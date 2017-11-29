@@ -285,7 +285,7 @@ void TravellingSalesmanProblem::loadFromFile(std::string filename) {
             for (int j = 0; j < numberOfCities; j++){
                 int length;
                 fin >> length;
-                if (length == -1) length = 0;
+                //if (length == -1) length = 0;
                 gm.setEdge(i,j,length);
             }
         }
