@@ -31,6 +31,8 @@ public:
     void start();
     void stop();
     double get();
+    double getWithoutStopping();
+
 };
 
 

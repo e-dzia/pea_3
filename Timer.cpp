@@ -39,3 +39,12 @@ double Timer::get() {
     QueryPerformanceFrequency(&frequency);
     return (double)(time_end.QuadPart - time_start.QuadPart)/frequency.QuadPart;
 }
+
+double Timer::getWithoutStopping() {
+    LARGE_INTEGER timer;
+    QueryPerformanceCounter(&timer);
+
+    LARGE_INTEGER frequency;
+    QueryPerformanceFrequency(&frequency);
+    return (double)(timer.QuadPart - time_start.QuadPart)/frequency.QuadPart;
+}

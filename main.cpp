@@ -1,18 +1,54 @@
 #include <iostream>
 #include <ctime>
+#include <thread>
 #include "TravellingSalesmanProblem.h"
 
 void test();
 void test2();
 void test_both();
 
+void func(){
+    /*Timer t;
+    t.start();
+    double time = 0;
+    do {
+        time = t.getWithoutStopping();
+    }while(time < 5);*/
+    std::this_thread::sleep_for (std::chrono::seconds(3));
+    exit(0);
+}
+
 int main() {
     srand(time(NULL));
 
+    //std::thread wateczek(func);
+
+   // static std::thread::native_handle();
+
+   /* boost::thread t(boost::bind(func1, arr1));
+    if(!t.timed_join(boost::posix_time::minutes(5))){
+        // thread still running, use interrupt or detach
+    }
+
+    boost::thread api_caller(::func);
+    if (api_caller.timed_join(boost::posix_time::milliseconds(500)))
+    {
+        // API call returned within 500ms
+    }
+    else
+    {
+        // API call timed out
+    }*/
+
     TravellingSalesmanProblem * tsp = new TravellingSalesmanProblem;
-    //tsp->loadFromFile("dane.txt");
+    tsp->loadFromFile("dane.txt");
+
 
     tsp->menu();
+
+    //std::cout << tsp->bruteForce();
+
+    std::cout << tsp->tabuSearch();
     //tsp->generateRandom(4);
     //tsp->saveToFile("data_salesman.txt");
     //std::cout << tsp->testTime(3);
@@ -23,7 +59,7 @@ int main() {
     //test();
     //test_both();
 
-
+    //wateczek.join();
     return 0;
 }
 

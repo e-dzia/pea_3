@@ -13,37 +13,36 @@
 
 class TravellingSalesmanProblem{
 private:
+    enum neighbourhood{
+        SWAP = 0,
+        INSERT = 1,
+        INVERT = 2
+    };
+
     GraphMatrix gm;
     int numberOfCities;
-    long long int npow2;
-    int **subproblems, **path;
-    std::vector<int> arrayOfResults;
+    bool diversification = 0; //czy dywersyfikacja jest wlaczaona, 0 - nie, 1 - tak
+    double stopCriterium = 10; //czas w sekundach
+    neighbourhood currentNeighbourhood = SWAP;
 
-    int dp_func(int start, long long int visited);
-    void dp_getPath(int start, int visited);
+    void swap(int *permutation, int left, int right);
+    void insert(int *permutation, int left, int right);
+    void invert(int *permutation, int left, int right);
+
+    bool allVisited(bool pBoolean[]);
+    void permute(int *permutation, int left, int right, int &min, int *result);
+    int countPath(int *permutation);
 
 public:
     TravellingSalesmanProblem();
 
     std::string bruteForce();
 
-    std::string greedyAlgorithm();
-
-    std::string localSearch();
-
-    std::string dynamicProgramming();
+    std::string tabuSearch();
 
     void loadFromFile(std::string filename);
 
     void generateRandom(int size);
-
-    bool allVisited(bool pBoolean[]);
-
-    void permute(int *permutation, int left, int right, int &min, int *result);
-
-    void swap(int *pInt, int *pInt1);
-
-    int countPath(int *permutation);
 
     double testTime(int algorithmType);
 

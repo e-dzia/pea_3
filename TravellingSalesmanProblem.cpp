@@ -26,51 +26,9 @@ std::string TravellingSalesmanProblem::bruteForce() {
     return ss.str();
 }
 
-std::string TravellingSalesmanProblem::greedyAlgorithm() {
-    bool visited[numberOfCities];
-    int path[numberOfCities];
-    int length = 0;
-
-    for (int i = 0; i < numberOfCities; i++){
-        visited[i] = false;
-        path[i] = -1;
-    }
-    int start = 0;
-    int i = start;
-
-    while(!allVisited(visited)){
-        visited[i] = true;
-        int min = INT32_MAX;
-        int position = -1;
-        for (int j = 0; j < numberOfCities; j++){
-            if (!visited[j] && gm.getEdgeLength(i,j) != -1 && gm.getEdgeLength(i,j)  < min){
-                min = gm.getEdgeLength(i,j);
-                position = j;
-            }
-        }
-        if (min != INT32_MAX)
-            length += min;
-        else {
-            length += gm.getEdgeLength(i,start);
-        }
-        path[i] = position;
-        i = position;
-    }
-
-
-    std::stringstream ss;
-    ss << "Algorytm zachlanny.\nWynik: " << std::endl;
-    int j = start;
-    ss << j << " ";
-    while (path[j] != -1) {
-        ss << path[j] << " ";
-        j = path[j];
-    }
-    ss << ": " << length << std::endl;
-    return ss.str();
-}
-
-std::string TravellingSalesmanProblem::localSearch() {
+std::string TravellingSalesmanProblem::tabuSearch() {
+    Timer t;
+    t.start();
     bool visited[numberOfCities];
     int path[numberOfCities];
     int length = 0;
@@ -105,123 +63,79 @@ std::string TravellingSalesmanProblem::localSearch() {
     int j = start;
     permutation[0] = start;
     result_permutation[0] = start;
-    std::string result = "";
+    //std::string result = "";
     for (int i = 0; i < numberOfCities-1; i++){
         permutation[i+1] = path[j];
         result_permutation[i+1] = path[j];
         j = path[j];
-        int temp = permutation[i];
+        //int temp = permutation[i];
     }
 
-    for (int i = 1; i < numberOfCities-1; i++){
-        swap(permutation+i,permutation+i+1);
-        int tmp = countPath(permutation);
-        if (tmp < length){
-            length = tmp;
-            for (int i = 0; i < numberOfCities; i++){
-                result_permutation[i] =  permutation[i];
+    for (int i = 1; i < numberOfCities-1 && t.getWithoutStopping() < stopCriterium; i++){
+        for (int j = 1; j < numberOfCities -1 && t.getWithoutStopping() < stopCriterium; j++) {
+            if (i != j) {
+                switch(currentNeighbourhood){
+                    case SWAP:
+                        swap(permutation, i, j);
+                        break;
+                    case INSERT:
+                        insert(permutation, i, j);
+                        break;
+                    case INVERT:
+                        invert(permutation, i, j);
+                        break;
+                }
+                int tmp = countPath(permutation);
+                if (tmp <= length) {
+                    length = tmp;
+                    for (int i = 0; i < numberOfCities; i++) {
+                        result_permutation[i] = permutation[i];
+                    }
+                } else {
+                    switch(currentNeighbourhood){
+                        case SWAP:
+                            swap(permutation, i, j);
+                            break;
+                        case INSERT:
+                            insert(permutation, j, i);
+                            break;
+                        case INVERT:
+                            invert(permutation, i, j);
+                            break;
+                    }
+                }
             }
         }
-        else{
-            swap(permutation+i,permutation+i+1);
-        }
     }
 
+    /*for (int i = 0; i < numberOfCities; i++){
+        std::cout << permutation[i] << " ";
+    }
+    std::cout << std::endl;
+
+    invert(permutation,0,3);
+
+    for (int i = 0; i < numberOfCities; i++){
+        std::cout << permutation[i] << " ";
+    }
+    std::cout << std::endl;
+
+    invert(permutation,3,0);
+
+    for (int i = 0; i < numberOfCities; i++){
+        std::cout << permutation[i] << " ";
+    }
+    std::cout << std::endl;
+*/
 
     std::stringstream ss;
-    ss << "Algorytm przeszukiwania lokalnego.\nWynik: " << std::endl;
+    ss << "Algorytm tabu search.\nWynik: " << std::endl;
     for (int i = 0; i < numberOfCities; i++){
         ss << result_permutation[i] << " ";
     }
     //ss << result << " ";
     ss << ": " << length << std::endl;
     return ss.str();
-}
-
-std::string TravellingSalesmanProblem::dynamicProgramming() {
-    npow2 = 1 << (numberOfCities-1); //2^(numberOfCities-1)
-
-    subproblems = new int*[numberOfCities]; //tabela dwuwymiarowa
-    path = new int*[numberOfCities]; //tabela dwuwymiarowa
-    for (int i = 0; i < numberOfCities; i++) {
-        subproblems[i] = new int[npow2];
-        path[i] = new int[npow2];
-
-        for (int j = 0; j < npow2; j++) {
-            subproblems[i][j] = -1;
-            path[i][j] = -1;
-        }
-    }
-
-    for (int i = 1; i < numberOfCities; i++) {
-        subproblems[i][0] = gm.getEdgeLength(i,0);
-    } //pierwsza kolumna - dane wejściowe, reszta -1
-    int result = dp_func(0, npow2 - 1); //uruchom dp_func start = 0, set = npow2 - 1
-
-    /*std::cout<<"\nsubproblems:";
-
-    for(int i=0;i < npow2;i++)
-    {
-        std::cout<<"\n";
-        for(int j=0;j < numberOfCities;j++)
-            std::cout<<"\t"<<subproblems[j][i];
-    }
-    std::cout<<"\n\n";*/
-
-    arrayOfResults.push_back(0);
-    dp_getPath(0, npow2 - 1);
-
-    std::stringstream ss;
-    ss << "Algorytm programowania dynamicznego.\nWynik: " << std::endl;
-    for (auto &&item : arrayOfResults) {
-        ss << item << " ";
-    }
-    ss << " : " << result << std::endl;
-
-
-    for (int i = 0; i < numberOfCities; i++) {
-        delete[] subproblems[i];
-        delete[] path[i];
-
-    }
-    delete[] subproblems;
-    delete[] path;
-
-    return ss.str();
-}
-
-int TravellingSalesmanProblem::dp_func(int start, long long int visited) {
-    long long int masked, mask;
-    int result = -1, temp;
-
-    if (subproblems[start][visited] != -1) {
-        return subproblems[start][visited];
-    } else {
-        for (int i = 0; i < numberOfCities-1; i++) {
-            mask = npow2 - 1 - (1 << i);
-            masked = visited & mask; //maska binarna AND
-            if (masked != visited) {
-                temp = gm.getEdgeLength(start,i+1) + dp_func(i+1, masked); //droga od start do i + dp_func(i,masked)
-                if (result == -1 || result > temp) {
-                    result = temp;
-                    path[start][visited] = i+1;
-                }
-            }
-        }
-        subproblems[start][visited] = result;
-        return result;
-    }
-}
-
-void TravellingSalesmanProblem::dp_getPath(int start, int visited) { //tu tylko znajduje trasę
-    if (path[start][visited] == -1) {
-        return;
-    }
-    int i = path[start][visited];
-    int mask = npow2 - 1 - (1 << (i-1));
-    int masked = visited & mask;
-    arrayOfResults.push_back(i);
-    dp_getPath(i, masked);
 }
 
 void TravellingSalesmanProblem::permute(int *permutation, int left, int right, int &min, int *result) {
@@ -238,18 +152,46 @@ void TravellingSalesmanProblem::permute(int *permutation, int left, int right, i
     {
         for (int i = left; i <= right; i++)
         {
-            swap((permutation+left), (permutation+i));
+            swap(permutation, i, left);
             permute(permutation, left + 1, right, min, result);
-            swap((permutation+left), (permutation+i)); //powrót do poprzedniego
+            swap(permutation, i, left); //powrót do poprzedniego
         }
     }
 
 }
 
-void TravellingSalesmanProblem::swap(int *pInt, int *pInt1) {
-    int tmp = *pInt;
-    *pInt = *pInt1;
-    *pInt1 = tmp;
+void TravellingSalesmanProblem::swap(int *permutation, int left, int right) {
+    if (right == left) return;
+    int tmp = permutation[left];
+    permutation[left] = permutation[right];
+    permutation[right] = tmp;
+}
+
+void TravellingSalesmanProblem::insert(int *permutation, int left, int right) {
+    if (right == left) return;
+    if (right < left){
+        int tmp = permutation[left];
+        for (int i = left; i > right; i--){
+            permutation[i] = permutation[i-1];
+        }
+        permutation[right] = tmp;
+    }
+    else {
+        int tmp = permutation[left];
+        for (int i = left; i < right; i++){
+            permutation[i] = permutation[i+1];
+        }
+        permutation[right] = tmp;
+    }
+
+}
+
+void TravellingSalesmanProblem::invert(int *permutation, int left, int right) {
+    if (right == left) return;
+    if (right < left){int tmp = left; left = right; right = tmp;}
+    for (int i = 0; i < (right - left +1)/2; i++){
+        swap(permutation,left+i,right-i);
+    }
 }
 
 int TravellingSalesmanProblem::countPath(int *permutation) {
@@ -312,12 +254,15 @@ bool TravellingSalesmanProblem::allVisited(bool *visited) {
 void TravellingSalesmanProblem::menu() {
     std::cout << "MENU - Problem komiwojazera\n"
             "1. Wczytaj z pliku.\n"
-            "2. Generuj losowo.\n"
-            "3. Przeglad zupelny.\n"
-            "4. Algorytm zachlanny.\n"
-            "5. Przeszukiwanie lokalne.\n"
-            "6. Programowanie dynamiczne.\n"
-            "7. Wyjdz.\n"
+            "2. Wprowadz kryterium stopu. Teraz: " << stopCriterium << " s.\n"
+            "3. Dywersyfikacja. Teraz: " << diversification << ". "
+            "(0 - wylaczona, 1 - wlaczona).\n"
+            "4. Wybor sasiedztwa. Teraz: " << currentNeighbourhood << ". "
+            "(0 - swap, 1 - insert, 2 - invert).\n"
+            "5. Tabu search.\n"
+            "6. Wyjdz.\n"
+            "7. Generuj losowo.\n"
+            "8. Przeglad zupelny.\n"
             "Prosze wpisac odpowiednia liczbe.\n";
     int chosen;
     std::string file_name;
@@ -329,25 +274,51 @@ void TravellingSalesmanProblem::menu() {
             this->loadFromFile(file_name);
             break;
         case 2:
+            std::cout << "Prosze podac kryterium stopu (w sekundach).\n";
+            //int v;
+            std::cin >> stopCriterium;
+            //this->generateRandom(v);
+            break;
+        case 3:
+            std::cout << "Prosze podac wlaczenie/wylaczenie dywersyfikacji.\n"
+                    "Wlaczenie - 1; Wylaczenie - 0.\n";
+            //int v;
+            std::cin >> diversification;
+            //this->generateRandom(v);
+            break;
+        case 4:
+            std::cout << "Prosze wybrac sasiedztwo.\n"
+                    "0 - swap\n"
+                    "1 - insert\n"
+                    "2 - invert\n";
+            int neighbours;
+            std::cin >> neighbours;
+            switch(neighbours){
+                case 0:
+                    currentNeighbourhood = SWAP;
+                    break;
+                case 1:
+                    currentNeighbourhood = INSERT;
+                    break;
+                case 2:
+                    currentNeighbourhood = INVERT;
+                    break;
+            }
+            break;
+        case 5:
+            std::cout << "\n########################################\n" << this->tabuSearch();
+            break;
+        case 6:
+            return;
+        case 7:
             std::cout << "Prosze podac liczbe miast.\n";
             int v;
             std::cin >> v;
             this->generateRandom(v);
             break;
-        case 3:
+        case 8:
             std::cout << "\n########################################\n" << this->bruteForce();
             break;
-        case 4:
-            std::cout << "\n########################################\n" << this->greedyAlgorithm();
-            break;
-        case 5:
-            std::cout << "\n########################################\n" << this->localSearch();
-            break;
-        case 6:
-            std::cout << "\n########################################\n" << this->dynamicProgramming();
-            break;
-        case 7:
-            return;
         default:
             std::cout  << "Prosze podac poprawna liczbe.\n";
             std::cin.clear();
@@ -360,9 +331,7 @@ void TravellingSalesmanProblem::menu() {
 double TravellingSalesmanProblem::testTime(int algorithmType) {
     /*algorithmType:
      * 0 - bruteforce
-     * 1 - zachłanny
-     * 2 - przeszukiwanie lokalne
-     * 3 - programowanie dynamiczne
+     * 1 - tabu search
      * */
 
     Timer *timer = new Timer;
@@ -379,17 +348,7 @@ double TravellingSalesmanProblem::testTime(int algorithmType) {
             break;
         case 1:
             timer->start();
-            this->greedyAlgorithm();
-            timer->stop();
-            break;
-        case 2:
-            timer->start();
-            this->localSearch();
-            timer->stop();
-            break;
-        case 3:
-            timer->start();
-            this->dynamicProgramming();
+            this->tabuSearch();
             timer->stop();
             break;
     }
@@ -400,6 +359,5 @@ double TravellingSalesmanProblem::testTime(int algorithmType) {
 }
 
 TravellingSalesmanProblem::TravellingSalesmanProblem() {
-    subproblems = NULL;
-    path = NULL;
+
 }
