@@ -37,7 +37,7 @@ void GraphMatrix::loadFromFile(std::string filename) {
         fin >> startVertex;
         fin >> endVertex;
         fin >> length;
-        if (matrix[startVertex][endVertex] == 0)
+        if (matrix[startVertex][endVertex] == -1)
             matrix[startVertex][endVertex] = length;
     }
 
@@ -80,7 +80,7 @@ void GraphMatrix::createMatrix(int v) {
 
     for (int i = 0; i < v; i++){
         for (int j = 0; j < v; j++){
-            matrix[i][j] = 0;
+            matrix[i][j] = -1;
         }
     }
 }
@@ -89,7 +89,7 @@ void GraphMatrix::countEdges() {
     edges = 0;
     for (int i = 0; i < vertexes; i++){
         for (int j = 0; j < vertexes; j++){
-            if (matrix[i][j] != 0)
+            if (matrix[i][j] != -1)
                 edges++;
         }
     }
@@ -112,7 +112,7 @@ void GraphMatrix::createRandom(int vertexes, int density) {
             endVertex = rand()%vertexes;
             length = rand()%50+1;
             if (startVertex != endVertex){
-                if (matrix[startVertex][endVertex] == 0){
+                if (matrix[startVertex][endVertex] == -1){
                     matrix[startVertex][endVertex] = length;
                     again = false;
                 }
@@ -126,7 +126,7 @@ void GraphMatrix::createRandom(int vertexes, int density) {
 void GraphMatrix::makeBothWaysEqual() {
     for (int i = 0; i < this->vertexes; i++){
         for (int j = 0; j < this->vertexes; j++){
-            if (this->matrix[i][j] != 0){
+            if (this->matrix[i][j] != -1){
                 this->matrix[j][i] = this->matrix[i][j];
             }
         }

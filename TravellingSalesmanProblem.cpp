@@ -224,18 +224,73 @@ void TravellingSalesmanProblem::saveToFile(std::string filename) {
 }
 
 void TravellingSalesmanProblem::loadFromFile(std::string filename) {
+    std::cout << gm;
     std::ifstream fin;
     fin.open(filename.c_str());
-    fin >> numberOfCities;
-    gm.createMatrix(numberOfCities);
-    for (int i = 0; i < numberOfCities; i++){
-        for (int j = 0; j < numberOfCities; j++){
-            int length;
-            fin >> length;
-            if (length == -1) length = 0;
-            gm.setEdge(i,j,length);
+    if (filename.find(".atsp")!=std::string::npos){ //atsp
+        std::string tmp;
+        do {
+            fin >> tmp;
+        }
+        while (tmp != "DIMENSION:");
+        fin >> numberOfCities;
+        gm.createMatrix(numberOfCities);
+        do {
+            fin >> tmp;
+        }
+        while (tmp != "EDGE_WEIGHT_SECTION");
+        for (int i = 0; i < numberOfCities; i++){
+            for (int j = 0; j < numberOfCities; j++){
+                int length;
+                fin >> length;
+                //if (length == -1) length = 0;
+                gm.setEdge(i,j,length);
+            }
         }
     }
+    else if (filename.find(".tsp")!=std::string::npos){ //tsp
+        std::string tmp;
+        do {
+            fin >> tmp;
+        }
+        while (tmp != "DIMENSION:");
+        fin >> numberOfCities;
+        gm.createMatrix(numberOfCities);
+        do {
+            fin >> tmp;
+        }
+        while (tmp != "EDGE_WEIGHT_FORMAT:");
+        fin >> tmp;
+        if (tmp.find("LOWER_DIAG_ROW")!=std::string::npos){
+            do {
+                fin >> tmp;
+            }
+            while (tmp != "EDGE_WEIGHT_SECTION");
+            for (int i = 0; i < numberOfCities; i++){
+                for (int j = 0; j <= i; j++){
+                    int length;
+                    fin >> length;
+                    //if (length == -1) length = 0;
+                    gm.setEdge(i,j,length);
+                    gm.setEdge(j,i,length);
+                }
+            }
+        }
+
+    }
+    else if (filename.find(".txt")!=std::string::npos){
+        fin >> numberOfCities;
+        gm.createMatrix(numberOfCities);
+        for (int i = 0; i < numberOfCities; i++){
+            for (int j = 0; j < numberOfCities; j++){
+                int length;
+                fin >> length;
+                if (length == -1) length = 0;
+                gm.setEdge(i,j,length);
+            }
+        }
+    }
+
 }
 
 void TravellingSalesmanProblem::generateRandom(int size) {
