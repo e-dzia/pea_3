@@ -83,8 +83,27 @@ std::string TravellingSalesmanProblem::tabuSearch() {
             }
         }
 
-        //TODO: aktualizacja listy tabu: zmniejsze kadencje i jak k==0, to usun
+        //TODO: aktualizacja listy tabu: zmniejsz kadencje
+        for(auto it = tabuList.begin(); it != tabuList.end(); ++it) {
+            it->lifetime--;
+
+            if (it->lifetime == 0){
+                delete[] it->solution;
+                tabuList.erase(it);
+                --it;
+            }
+        }
+
         //TODO: dodaj nowe elementy do listy tabu
+        if (tabuList.size() < numberOfCities){
+            TabuElement te;
+            te.solution = new int[numberOfCities];
+            for (int i = 0; i < numberOfCities; i++) te.solution[i] = current_permutation[i];
+            te.lifetime = numberOfCities;
+            tabuList.insert(tabuList.begin(),te);
+        }
+
+
         //TODO: if criticalEvent() to restart [Dywersyfikacja]; if lepsze po restarcie, to podmien
     }
 
@@ -123,7 +142,9 @@ std::string TravellingSalesmanProblem::tabuSearch() {
     return ss.str();
 }
 
-
+/*
+ * Znajduje najlepsze rozwiazanie w okolicy
+ * */
 void TravellingSalesmanProblem::newSolution(int *result_permutation) {
     int min = INT32_MAX;
     int *current_permutation = new int[numberOfCities];
@@ -142,7 +163,7 @@ void TravellingSalesmanProblem::newSolution(int *result_permutation) {
                     std::cout << current_permutation[k] << " ";
                 }
                 std::cout << tmp << std::endl;*/
-                if (tmp <= min) { //TODO: I nie w liscie tabu
+                if (tmp <= min && !inTabuList(current_permutation)) { //TODO: I nie w liscie tabu
                     min = tmp;
                     for (int i = 0; i < numberOfCities; i++) {
                         result_permutation[i] = current_permutation[i];
@@ -157,6 +178,22 @@ void TravellingSalesmanProblem::newSolution(int *result_permutation) {
             }
         }
     }
+}
+
+bool TravellingSalesmanProblem::inTabuList(int *current_permutation) {
+    bool inTabu = false;
+    for (auto it = tabuList.begin(); it != tabuList.end(); ++it){
+
+        inTabu = true;
+        for (int i = 0; i < numberOfCities; i++) {
+            if(it->solution[i]!=current_permutation[i]){
+                inTabu = false;
+                break;
+            }
+        }
+        if (inTabu) return true;
+    }
+    return false;
 }
 
 

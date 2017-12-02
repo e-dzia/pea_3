@@ -11,6 +11,11 @@
 #include <vector>
 #include "Timer.h"
 
+struct TabuElement{
+    int* solution;
+    int lifetime;
+};
+
 class TravellingSalesmanProblem{
 private:
     enum neighbourhood{
@@ -24,7 +29,7 @@ private:
     bool diversification = 0; //czy dywersyfikacja jest wlaczaona, 0 - nie, 1 - tak
     double stopCriterium = INT32_MAX; //czas w sekundach
     neighbourhood currentNeighbourhood = SWAP;
-    std::vector<int> tabuList;
+    std::vector<TabuElement> tabuList;
     int numberOfIterations = 500;
 
     void swap(int *permutation, int left, int right);
@@ -51,6 +56,8 @@ public:
     void saveToFile(std::string filename);
 
     void menu();
+
+    bool inTabuList(int *current_permutation);
 };
 
 
