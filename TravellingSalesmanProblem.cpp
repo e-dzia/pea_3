@@ -50,20 +50,18 @@ std::string TravellingSalesmanProblem::tabuSearch() {
                 position = j;
             }
         }
-        if (min != INT32_MAX)
-            length += min;
-        else {
-            length += gm.getEdgeLength(k,start);
-        }
+        length += min;
         k = position;
         permutation[i] = position;
     }
+    length += gm.getEdgeLength(k,start);
 
     int *result_permutation = new int[numberOfCities];
     result_permutation[0] = start;
     for (int i = 0; i < numberOfCities; i++){
         result_permutation[i] = permutation[i];
     }
+    int result_length = length;
 
     for (int i = 1; i < numberOfCities-1 && t.getWithoutStopping() < stopCriterium; i++){
         for (int j = 1; j < numberOfCities -1 && t.getWithoutStopping() < stopCriterium; j++) {
@@ -80,7 +78,11 @@ std::string TravellingSalesmanProblem::tabuSearch() {
                         break;
                 }
                 int tmp = countPath(permutation);
-                if (tmp <= length + diversification*10) {
+                for (int k = 0; k < numberOfCities; k++){
+                    std::cout << permutation[k] << " ";
+                }
+                std::cout << tmp << std::endl;
+                if (tmp <= length + diversification*100) {
                     length = tmp;
                     for (int i = 0; i < numberOfCities; i++) {
                         result_permutation[i] = permutation[i];
@@ -221,8 +223,8 @@ void TravellingSalesmanProblem::saveToFile(std::string filename) {
     }
 }
 
-void TravellingSalesmanProblem::loadFromFile(std::string filename) {
-    std::cout << gm;
+bool TravellingSalesmanProblem::loadFromFile(std::string filename) {
+    //std::cout << gm;
     std::ifstream fin;
     fin.open(filename.c_str());
     if (filename.find(".atsp")!=std::string::npos){ //atsp
@@ -245,6 +247,7 @@ void TravellingSalesmanProblem::loadFromFile(std::string filename) {
                 gm.setEdge(i,j,length);
             }
         }
+        return true;
     }
     else if (filename.find(".tsp")!=std::string::npos){ //tsp
         std::string tmp;
@@ -274,7 +277,7 @@ void TravellingSalesmanProblem::loadFromFile(std::string filename) {
                 }
             }
         }
-
+        return true;
     }
     else if (filename.find(".txt")!=std::string::npos){
         fin >> numberOfCities;
@@ -287,21 +290,15 @@ void TravellingSalesmanProblem::loadFromFile(std::string filename) {
                 gm.setEdge(i,j,length);
             }
         }
+        return true;
     }
-
+    return false;
 }
 
 void TravellingSalesmanProblem::generateRandom(int size) {
     numberOfCities = size;
     gm.createRandom(numberOfCities,100);
     //gm.makeBothWaysEqual();
-}
-
-bool TravellingSalesmanProblem::allVisited(bool *visited) {
-    for (int i = 0; i < numberOfCities; i++){
-        if (!visited[i]) return false;
-    }
-    return true;
 }
 
 void TravellingSalesmanProblem::menu() {
@@ -324,7 +321,10 @@ void TravellingSalesmanProblem::menu() {
         case 1:
             std::cout << "Prosze podac nazwe pliku.\n";
             std::cin >> file_name;
-            this->loadFromFile(file_name);
+            if (this->loadFromFile(file_name)){
+                std::cout << "Poprawnie wczytano.\n";
+            }
+            else std::cout << "Nie udalo sie wczytac pliku.\n";
             break;
         case 2:
             std::cout << "Prosze podac kryterium stopu (w sekundach).\n";

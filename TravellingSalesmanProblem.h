@@ -22,7 +22,7 @@ private:
     GraphMatrix gm;
     int numberOfCities;
     bool diversification = 0; //czy dywersyfikacja jest wlaczaona, 0 - nie, 1 - tak
-    double stopCriterium = 10; //czas w sekundach
+    double stopCriterium = INT32_MAX; //czas w sekundach
     neighbourhood currentNeighbourhood = SWAP;
     std::vector<int> tabuList;
 
@@ -41,7 +41,7 @@ public:
 
     std::string tabuSearch();
 
-    void loadFromFile(std::string filename);
+    bool loadFromFile(std::string filename);
 
     void generateRandom(int size);
 
