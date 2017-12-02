@@ -27,63 +27,45 @@ std::string TravellingSalesmanProblem::bruteForce() {
 }
 
 std::string TravellingSalesmanProblem::tabuSearch() {
+    tabuList.clear();
     Timer t;
     t.start();
-    bool *visited = new bool[numberOfCities];
     int *current_permutation = new int[numberOfCities];
-    int length = 0;
-
-    for (int i = 0; i < numberOfCities; i++){
-        visited[i] = false;
-    }
-    int start = 0;
-    int k = start;
-
-    current_permutation[0] = start;
-    for(int i = 1; i < numberOfCities; i++){ //algorytm zachlanny szuka ustawienia poczatkowego
-        visited[k] = true;
-        int min = INT32_MAX;
-        int position = -1;
-        for (int j = 0; j < numberOfCities; j++){ //szukanie minimum od obecnej pozycji
-            if (!visited[j] && gm.getEdgeLength(k,j) != -1 && gm.getEdgeLength(k,j) < min){
-                min = gm.getEdgeLength(k,j);
-                position = j;
-            }
-        }
-        length += min;
-        k = position;
-        current_permutation[i] = position;
-    }
-    length += gm.getEdgeLength(k,start);
+    int length = beginning(current_permutation);
 
     int *result_permutation = new int[numberOfCities];
+    int *notRepeatable = new int[numberOfCities];
     result_permutation[0] = start;
     for (int i = 0; i < numberOfCities; i++){
         result_permutation[i] = current_permutation[i];
+        notRepeatable[i] = current_permutation[i];
     }
     int result_length = length;
 
     int nOI = numberOfIterations;
+    int numberOfIterationsWithoutChange = 0;
     //resetTabuList();
     while (nOI-->0 && t.getWithoutStopping() < stopCriterium){
         //nowe rozwiazanie
         newSolution(current_permutation);
         int tmp = countPath(current_permutation);
 
-        for (int i = 0; i < numberOfCities; i++){
+        /*for (int i = 0; i < numberOfCities; i++){
             std::cout << current_permutation[i] << " ";
         }
          std::cout << tmp << std::endl;
-
+        */
 
         if (tmp <= length){
+            //std::cout << numberOfIterationsWithoutChange << std::endl;
+            numberOfIterationsWithoutChange = 0;
             length = tmp;
             for (int i = 0; i < numberOfCities; i++){
                 result_permutation[i] = current_permutation[i];
             }
         }
 
-        //TODO: aktualizacja listy tabu: zmniejsz kadencje
+        //aktualizacja listy tabu: zmniejszenie kadencji i usuniecie zbednych pozycji
         for(auto it = tabuList.begin(); it != tabuList.end(); ++it) {
             it->lifetime--;
 
@@ -95,16 +77,34 @@ std::string TravellingSalesmanProblem::tabuSearch() {
         }
 
         //TODO: dodaj nowe elementy do listy tabu
-        if (tabuList.size() < numberOfCities){
-            TabuElement te;
-            te.solution = new int[numberOfCities];
+        if (tabuList.size() < numberOfCities*2){ //TODO: ???
+            TabuElement te{new int[numberOfCities],numberOfCities*2};
             for (int i = 0; i < numberOfCities; i++) te.solution[i] = current_permutation[i];
-            te.lifetime = numberOfCities;
             tabuList.insert(tabuList.begin(),te);
         }
 
 
         //TODO: if criticalEvent() to restart [Dywersyfikacja]; if lepsze po restarcie, to podmien
+        if(diversification && CriticalEvent(numberOfIterationsWithoutChange)){
+            //std::cout << nOI << " Critical Event\n";
+            restart(current_permutation);
+            tmp = countPath(current_permutation);
+
+           /* for (int i = 0; i < numberOfCities; i++){
+                std::cout << current_permutation[i] << " ";
+            }
+            std::cout << tmp << std::endl;
+*/
+            numberOfIterationsWithoutChange = 0;
+            if (tmp <= length){
+                numberOfIterationsWithoutChange = 0;
+                length = tmp;
+                for (int i = 0; i < numberOfCities; i++){
+                    result_permutation[i] = current_permutation[i];
+                }
+            }
+        }
+        numberOfIterationsWithoutChange++;
     }
 
 
@@ -136,10 +136,64 @@ std::string TravellingSalesmanProblem::tabuSearch() {
     //ss << result << " ";
     ss << ": " << length << std::endl;
 
-    delete[] visited;
     delete[] current_permutation;
     delete[] result_permutation;
     return ss.str();
+}
+
+
+void TravellingSalesmanProblem::restart_random(int *current_permutation) { //TODO: algorytm zachlanny od wylosowanego wierzcholka
+    bool* visited = new bool[numberOfCities];
+    for (int i = 0; i < numberOfCities; i++){
+        visited[i] = false;
+    }
+    visited[0] = true;
+    current_permutation[0] = 0;
+    for (int i = 1; i < numberOfCities; i++){
+        do{
+            current_permutation[i] = rand()%numberOfCities;
+        }while(visited[current_permutation[i]]);
+        visited[current_permutation[i]] = true;
+    }
+    delete[] visited;
+}
+
+void TravellingSalesmanProblem::restart(int *current_permutation) {
+    bool *visited = new bool[numberOfCities];
+    for (int i = 0; i < numberOfCities; i++){
+        visited[i] = false;
+    }
+
+    int k = start;
+    current_permutation[0] = start;
+    visited[start] = true;
+    current_permutation[1] = rand()%(numberOfCities-1)+1;
+    visited[current_permutation[1]] = true;
+    for(int i = 2; i < numberOfCities; i++){ //algorytm zachlanny szuka ustawienia poczatkowego
+        visited[k] = true;
+        int min = INT32_MAX;
+        int position = -1;
+        for (int j = 0; j < numberOfCities; j++){ //szukanie minimum od obecnej pozycji
+            if (!visited[j] && gm.getEdgeLength(k,j) != -1 && gm.getEdgeLength(k,j) < min){
+                min = gm.getEdgeLength(k,j);
+                position = j;
+            }
+        }
+        k = position;
+        current_permutation[i] = position;
+    }
+    delete[] visited;
+}
+
+bool TravellingSalesmanProblem::allVisited(bool *visited) {
+    for (int i = 0; i < numberOfCities; i++){
+        if (!visited[i]) return false;
+    }
+    return true;
+}
+
+bool TravellingSalesmanProblem::CriticalEvent(int number) {
+    return (number > numberOfCities*2);
 }
 
 /*
@@ -195,6 +249,37 @@ bool TravellingSalesmanProblem::inTabuList(int *current_permutation) {
     }
     return false;
 }
+
+int TravellingSalesmanProblem::beginning(int *current_permutation) {
+    bool *visited = new bool[numberOfCities];
+    int length = 0;
+
+    for (int i = 0; i < numberOfCities; i++){
+        visited[i] = false;
+    }
+    int k = start;
+
+    current_permutation[0] = start;
+    for(int i = 1; i < numberOfCities; i++){ //algorytm zachlanny szuka ustawienia poczatkowego
+        visited[k] = true;
+        int min = INT32_MAX;
+        int position = -1;
+        for (int j = 0; j < numberOfCities; j++){ //szukanie minimum od obecnej pozycji
+            if (!visited[j] && gm.getEdgeLength(k,j) != -1 && gm.getEdgeLength(k,j) < min){
+                min = gm.getEdgeLength(k,j);
+                position = j;
+            }
+        }
+        length += min;
+        k = position;
+        current_permutation[i] = position;
+    }
+    length += gm.getEdgeLength(k,start);
+
+    delete[] visited;
+    return length;
+}
+
 
 
 void TravellingSalesmanProblem::permute(int *permutation, int left, int right, int &min, int *result) {

@@ -26,11 +26,12 @@ private:
 
     GraphMatrix gm;
     int numberOfCities;
-    bool diversification = 0; //czy dywersyfikacja jest wlaczaona, 0 - nie, 1 - tak
+    bool diversification = true; //czy dywersyfikacja jest wlaczaona, 0 - nie, 1 - tak
     double stopCriterium = INT32_MAX; //czas w sekundach
     neighbourhood currentNeighbourhood = SWAP;
     std::vector<TabuElement> tabuList;
-    int numberOfIterations = 500;
+    int numberOfIterations = 5000;
+    int start = 0;
 
     void swap(int *permutation, int left, int right);
     void insert(int *permutation, int left, int right);
@@ -58,6 +59,16 @@ public:
     void menu();
 
     bool inTabuList(int *current_permutation);
+
+    void restart(int *current_permutation);
+
+    bool CriticalEvent(int number);
+
+    bool allVisited(bool *visited);
+
+    void restart_random(int *permutation);
+
+    int beginning(int *current_permutation);
 };
 
 
