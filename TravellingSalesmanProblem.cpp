@@ -63,58 +63,31 @@ std::string TravellingSalesmanProblem::tabuSearch() {
     }
     int result_length = length;
 
-    int *current_min = new int[numberOfCities];
-    int current_minimum;
+    int nOI = numberOfIterations;
+    //resetTabuList();
+    while (nOI-->0 && t.getWithoutStopping() < stopCriterium){
+        //nowe rozwiazanie
+        newSolution(current_permutation);
+        int tmp = countPath(current_permutation);
 
-    for (int i = 1; i < numberOfCities-1 && t.getWithoutStopping() < stopCriterium; i++){
-        for (int j = 1; j < numberOfCities -1 && t.getWithoutStopping() < stopCriterium; j++) {
-            if (i != j) {
-                current_minimum = INT32_MAX;
-                switch(currentNeighbourhood){
-                    case SWAP:
-                        swap(current_permutation, i, j);
-                        break;
-                    case INSERT:
-                        insert(current_permutation, i, j);
-                        break;
-                    case INVERT:
-                        invert(current_permutation, i, j);
-                        break;
-                }
-                int tmp = countPath(current_permutation);
-                if (tmp <= current_minimum){
-                    current_minimum = tmp;
-                    for (int i = 0; i < numberOfCities; i++) {
-                        current_min[i] = current_permutation[i];
-                    }
-                }
+        for (int i = 0; i < numberOfCities; i++){
+            std::cout << current_permutation[i] << " ";
+        }
+         std::cout << tmp << std::endl;
 
-                switch(currentNeighbourhood){
-                    case SWAP:
-                        swap(current_permutation, i, j);
-                        break;
-                    case INSERT:
-                        insert(current_permutation, j, i);
-                        break;
-                    case INVERT:
-                        invert(current_permutation, i, j);
-                        break;
-                }
+
+        if (tmp <= length){
+            length = tmp;
+            for (int i = 0; i < numberOfCities; i++){
+                result_permutation[i] = current_permutation[i];
             }
         }
-        if (current_minimum <= result_length /*+ diversification*50*/) {
-            result_length = current_minimum;
-            for (int i = 0; i < numberOfCities; i++) {
-                current_permutation[i] = current_min[i];
-            }
-            if (result_length < length) {
-                length = result_length;
-                for (int i = 0; i < numberOfCities; i++) {
-                    result_permutation[i] = current_permutation[i];
-                }
-            }
-        }
+
+        //TODO: aktualizacja listy tabu: zmniejsze kadencje i jak k==0, to usun
+        //TODO: dodaj nowe elementy do listy tabu
+        //TODO: if criticalEvent() to restart [Dywersyfikacja]; if lepsze po restarcie, to podmien
     }
+
 
     /*for (int i = 0; i < numberOfCities; i++){
         std::cout << current_permutation[i] << " ";
@@ -149,6 +122,43 @@ std::string TravellingSalesmanProblem::tabuSearch() {
     delete[] result_permutation;
     return ss.str();
 }
+
+
+void TravellingSalesmanProblem::newSolution(int *result_permutation) {
+    int min = INT32_MAX;
+    int *current_permutation = new int[numberOfCities];
+    for (int i = 0; i < numberOfCities; i++) current_permutation[i] = result_permutation[i];
+
+    for (int i = 1; i < numberOfCities-1; i++){
+        for (int j = 1; j < numberOfCities -1; j++) {
+            if (i != j) {
+                switch(currentNeighbourhood){
+                    case SWAP: swap(current_permutation, i, j); break;
+                    case INSERT: insert(current_permutation, i, j); break;
+                    case INVERT: invert(current_permutation, i, j); break;
+                }
+                int tmp = countPath(current_permutation);
+                /*for (int k = 0; k < numberOfCities; k++){
+                    std::cout << current_permutation[k] << " ";
+                }
+                std::cout << tmp << std::endl;*/
+                if (tmp <= min) { //TODO: I nie w liscie tabu
+                    min = tmp;
+                    for (int i = 0; i < numberOfCities; i++) {
+                        result_permutation[i] = current_permutation[i];
+                    }
+                }
+                switch(currentNeighbourhood){
+                        case SWAP: swap(current_permutation, i, j); break;
+                        case INSERT: insert(current_permutation, j, i); break;
+                        case INVERT: invert(current_permutation, i, j); break;
+                }
+
+            }
+        }
+    }
+}
+
 
 void TravellingSalesmanProblem::permute(int *permutation, int left, int right, int &min, int *result) {
     if (left == right){

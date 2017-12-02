@@ -25,12 +25,13 @@ private:
     double stopCriterium = INT32_MAX; //czas w sekundach
     neighbourhood currentNeighbourhood = SWAP;
     std::vector<int> tabuList;
+    int numberOfIterations = 500;
 
     void swap(int *permutation, int left, int right);
     void insert(int *permutation, int left, int right);
     void invert(int *permutation, int left, int right);
 
-    bool allVisited(bool pBoolean[]);
+    void newSolution(int *result_permutation);
     void permute(int *permutation, int left, int right, int &min, int *result);
     int countPath(int *permutation);
 
