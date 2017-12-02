@@ -24,6 +24,7 @@ private:
     bool diversification = 0; //czy dywersyfikacja jest wlaczaona, 0 - nie, 1 - tak
     double stopCriterium = 10; //czas w sekundach
     neighbourhood currentNeighbourhood = SWAP;
+    std::vector<int> tabuList;
 
     void swap(int *permutation, int left, int right);
     void insert(int *permutation, int left, int right);

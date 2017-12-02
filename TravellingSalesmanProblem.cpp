@@ -29,46 +29,40 @@ std::string TravellingSalesmanProblem::bruteForce() {
 std::string TravellingSalesmanProblem::tabuSearch() {
     Timer t;
     t.start();
-    bool visited[numberOfCities];
-    int path[numberOfCities];
+    bool *visited = new bool[numberOfCities];
+    int *permutation = new int[numberOfCities];
     int length = 0;
 
     for (int i = 0; i < numberOfCities; i++){
         visited[i] = false;
-        path[i] = -1;
     }
     int start = 0;
-    int i = start;
+    int k = start;
 
-    while(!allVisited(visited)){
-        visited[i] = true;
+    permutation[0] = start;
+    for(int i = 1; i < numberOfCities; i++){ //algorytm zachlanny szuka ustawienia poczatkowego
+        visited[k] = true;
         int min = INT32_MAX;
         int position = -1;
-        for (int j = 0; j < numberOfCities; j++){
-            if (!visited[j] && gm.getEdgeLength(i,j) != -1 && gm.getEdgeLength(i,j)  < min){
-                min = gm.getEdgeLength(i,j);
+        for (int j = 0; j < numberOfCities; j++){ //szukanie minimum od obecnej pozycji
+            if (!visited[j] && gm.getEdgeLength(k,j) != -1 && gm.getEdgeLength(k,j) < min){
+                min = gm.getEdgeLength(k,j);
                 position = j;
             }
         }
         if (min != INT32_MAX)
             length += min;
         else {
-            length += gm.getEdgeLength(i,start);
+            length += gm.getEdgeLength(k,start);
         }
-        path[i] = position;
-        i = position;
+        k = position;
+        permutation[i] = position;
     }
-    int *permutation = new int[numberOfCities];
-    int * result_permutation = new int[numberOfCities];
-    int j = start;
-    permutation[0] = start;
+
+    int *result_permutation = new int[numberOfCities];
     result_permutation[0] = start;
-    //std::string result = "";
-    for (int i = 0; i < numberOfCities-1; i++){
-        permutation[i+1] = path[j];
-        result_permutation[i+1] = path[j];
-        j = path[j];
-        //int temp = permutation[i];
+    for (int i = 0; i < numberOfCities; i++){
+        result_permutation[i] = permutation[i];
     }
 
     for (int i = 1; i < numberOfCities-1 && t.getWithoutStopping() < stopCriterium; i++){
@@ -86,7 +80,7 @@ std::string TravellingSalesmanProblem::tabuSearch() {
                         break;
                 }
                 int tmp = countPath(permutation);
-                if (tmp <= length) {
+                if (tmp <= length + diversification*10) {
                     length = tmp;
                     for (int i = 0; i < numberOfCities; i++) {
                         result_permutation[i] = permutation[i];
@@ -135,6 +129,10 @@ std::string TravellingSalesmanProblem::tabuSearch() {
     }
     //ss << result << " ";
     ss << ": " << length << std::endl;
+
+    delete[] visited;
+    delete[] permutation;
+    delete[] result_permutation;
     return ss.str();
 }
 

@@ -13,7 +13,7 @@ int main() {
 
 
     TravellingSalesmanProblem * tsp = new TravellingSalesmanProblem;
-    tsp->loadFromFile("gr48.tsp");
+    tsp->loadFromFile("br10.atsp");
 
 
     tsp->menu();
