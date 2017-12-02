@@ -20,7 +20,7 @@ int main() {
 
     //std::cout << tsp->bruteForce();
 
-    std::cout << tsp->tabuSearch();
+    //std::cout << tsp->tabuSearch();
     //tsp->generateRandom(4);
     //tsp->saveToFile("data_salesman.txt");
     //std::cout << tsp->testTime(3);

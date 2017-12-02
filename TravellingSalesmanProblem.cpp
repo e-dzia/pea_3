@@ -30,7 +30,7 @@ std::string TravellingSalesmanProblem::tabuSearch() {
     Timer t;
     t.start();
     bool *visited = new bool[numberOfCities];
-    int *permutation = new int[numberOfCities];
+    int *current_permutation = new int[numberOfCities];
     int length = 0;
 
     for (int i = 0; i < numberOfCities; i++){
@@ -39,7 +39,7 @@ std::string TravellingSalesmanProblem::tabuSearch() {
     int start = 0;
     int k = start;
 
-    permutation[0] = start;
+    current_permutation[0] = start;
     for(int i = 1; i < numberOfCities; i++){ //algorytm zachlanny szuka ustawienia poczatkowego
         visited[k] = true;
         int min = INT32_MAX;
@@ -52,74 +52,86 @@ std::string TravellingSalesmanProblem::tabuSearch() {
         }
         length += min;
         k = position;
-        permutation[i] = position;
+        current_permutation[i] = position;
     }
     length += gm.getEdgeLength(k,start);
 
     int *result_permutation = new int[numberOfCities];
     result_permutation[0] = start;
     for (int i = 0; i < numberOfCities; i++){
-        result_permutation[i] = permutation[i];
+        result_permutation[i] = current_permutation[i];
     }
     int result_length = length;
+
+    int *current_min = new int[numberOfCities];
+    int current_minimum;
 
     for (int i = 1; i < numberOfCities-1 && t.getWithoutStopping() < stopCriterium; i++){
         for (int j = 1; j < numberOfCities -1 && t.getWithoutStopping() < stopCriterium; j++) {
             if (i != j) {
+                current_minimum = INT32_MAX;
                 switch(currentNeighbourhood){
                     case SWAP:
-                        swap(permutation, i, j);
+                        swap(current_permutation, i, j);
                         break;
                     case INSERT:
-                        insert(permutation, i, j);
+                        insert(current_permutation, i, j);
                         break;
                     case INVERT:
-                        invert(permutation, i, j);
+                        invert(current_permutation, i, j);
                         break;
                 }
-                int tmp = countPath(permutation);
-                for (int k = 0; k < numberOfCities; k++){
-                    std::cout << permutation[k] << " ";
-                }
-                std::cout << tmp << std::endl;
-                if (tmp <= length + diversification*100) {
-                    length = tmp;
+                int tmp = countPath(current_permutation);
+                if (tmp <= current_minimum){
+                    current_minimum = tmp;
                     for (int i = 0; i < numberOfCities; i++) {
-                        result_permutation[i] = permutation[i];
+                        current_min[i] = current_permutation[i];
                     }
-                } else {
-                    switch(currentNeighbourhood){
-                        case SWAP:
-                            swap(permutation, i, j);
-                            break;
-                        case INSERT:
-                            insert(permutation, j, i);
-                            break;
-                        case INVERT:
-                            invert(permutation, i, j);
-                            break;
-                    }
+                }
+
+                switch(currentNeighbourhood){
+                    case SWAP:
+                        swap(current_permutation, i, j);
+                        break;
+                    case INSERT:
+                        insert(current_permutation, j, i);
+                        break;
+                    case INVERT:
+                        invert(current_permutation, i, j);
+                        break;
+                }
+            }
+        }
+        if (current_minimum <= result_length /*+ diversification*50*/) {
+            result_length = current_minimum;
+            for (int i = 0; i < numberOfCities; i++) {
+                current_permutation[i] = current_min[i];
+            }
+            if (result_length < length) {
+                length = result_length;
+                for (int i = 0; i < numberOfCities; i++) {
+                    result_permutation[i] = current_permutation[i];
                 }
             }
         }
     }
 
     /*for (int i = 0; i < numberOfCities; i++){
-        std::cout << permutation[i] << " ";
+        std::cout << current_permutation[i] << " ";
     }
     std::cout << std::endl;
 
-    invert(permutation,0,3);
+    invert(current_permutation,0,3);
 
     for (int i = 0; i < numberOfCities; i++){
-        std::cout << permutation[i] << " ";
+        std::cout << current_permutation[i] << " ";
     }
     std::cout << std::endl;
 
-    invert(permutation,3,0);
+    invert(current_permutation,3,0);
 
     for (int i = 0; i < numberOfCities; i++){
-        std::cout << permutation[i] << " ";
+        std::cout << current_permutation[i] << " ";
     }
     std::cout << std::endl;
 */
@@ -133,7 +145,7 @@ std::string TravellingSalesmanProblem::tabuSearch() {
     ss << ": " << length << std::endl;
 
     delete[] visited;
-    delete[] permutation;
+    delete[] current_permutation;
     delete[] result_permutation;
     return ss.str();
 }
@@ -333,10 +345,9 @@ void TravellingSalesmanProblem::menu() {
             //this->generateRandom(v);
             break;
         case 3:
-            std::cout << "Prosze podac wlaczenie/wylaczenie dywersyfikacji.\n"
-                    "Wlaczenie - 1; Wylaczenie - 0.\n";
+            std::cout << "Zmieniono ustawienia dywersyfikacji.\n";
             //int v;
-            std::cin >> diversification;
+            diversification = !diversification;
             //this->generateRandom(v);
             break;
         case 4:
