@@ -43,11 +43,10 @@ std::string TravellingSalesmanProblem::tabuSearch() {
     int result_length = length;
 
     int nOI = numberOfIterations;
-    int numberOfIterationsWithoutChange = 0;
-    //resetTabuList();
+    int numberOfIterationsWithoutChange = numberOfCities*3;
     while (nOI-->0 && t.getWithoutStopping() < stopCriterium){
         //nowe rozwiazanie
-        newSolution(current_permutation);
+        TabuElement te = newSolution(current_permutation);
         int tmp = countPath(current_permutation);
 
         /*for (int i = 0; i < numberOfCities; i++){
@@ -58,7 +57,7 @@ std::string TravellingSalesmanProblem::tabuSearch() {
 
         if (tmp <= length){
             //std::cout << numberOfIterationsWithoutChange << std::endl;
-            numberOfIterationsWithoutChange = 0;
+            numberOfIterationsWithoutChange = numberOfCities*4;
             length = tmp;
             for (int i = 0; i < numberOfCities; i++){
                 result_permutation[i] = current_permutation[i];
@@ -70,7 +69,7 @@ std::string TravellingSalesmanProblem::tabuSearch() {
             it->lifetime--;
 
             if (it->lifetime == 0){
-                delete[] it->solution;
+                //delete[] it->solution;
                 tabuList.erase(it);
                 --it;
             }
@@ -78,9 +77,11 @@ std::string TravellingSalesmanProblem::tabuSearch() {
 
         //TODO: dodaj nowe elementy do listy tabu
         if (tabuList.size() < numberOfCities*2){ //TODO: ???
-            TabuElement te{new int[numberOfCities],numberOfCities*2};
-            for (int i = 0; i < numberOfCities; i++) te.solution[i] = current_permutation[i];
+            te.lifetime = numberOfCities;
             tabuList.insert(tabuList.begin(),te);
+            /*TabuElement te{new int[numberOfCities],numberOfCities*2};
+            for (int i = 0; i < numberOfCities; i++) te.solution[i] = current_permutation[i];
+            tabuList.insert(tabuList.begin(),te);*/
         }
 
 
@@ -95,16 +96,16 @@ std::string TravellingSalesmanProblem::tabuSearch() {
             }
             std::cout << tmp << std::endl;
 */
-            numberOfIterationsWithoutChange = 0;
+            numberOfIterationsWithoutChange = numberOfCities*3;
             if (tmp <= length){
-                numberOfIterationsWithoutChange = 0;
+                numberOfIterationsWithoutChange = numberOfCities*2;
                 length = tmp;
                 for (int i = 0; i < numberOfCities; i++){
                     result_permutation[i] = current_permutation[i];
                 }
             }
         }
-        numberOfIterationsWithoutChange++;
+        numberOfIterationsWithoutChange--;
     }
 
 
@@ -185,28 +186,22 @@ void TravellingSalesmanProblem::restart(int *current_permutation) {
     delete[] visited;
 }
 
-bool TravellingSalesmanProblem::allVisited(bool *visited) {
-    for (int i = 0; i < numberOfCities; i++){
-        if (!visited[i]) return false;
-    }
-    return true;
-}
-
 bool TravellingSalesmanProblem::CriticalEvent(int number) {
-    return (number > numberOfCities*2);
+    return (number <= 0);
 }
 
 /*
  * Znajduje najlepsze rozwiazanie w okolicy
  * */
-void TravellingSalesmanProblem::newSolution(int *result_permutation) {
+TabuElement TravellingSalesmanProblem::newSolution(int *result_permutation) {
+    TabuElement te; //changed
     int min = INT32_MAX;
     int *current_permutation = new int[numberOfCities];
     for (int i = 0; i < numberOfCities; i++) current_permutation[i] = result_permutation[i];
 
     for (int i = 1; i < numberOfCities-1; i++){
         for (int j = 1; j < numberOfCities -1; j++) {
-            if (i != j) {
+            if (i != j && !inTabuList(i, j)) {
                 switch(currentNeighbourhood){
                     case SWAP: swap(current_permutation, i, j); break;
                     case INSERT: insert(current_permutation, i, j); break;
@@ -217,7 +212,8 @@ void TravellingSalesmanProblem::newSolution(int *result_permutation) {
                     std::cout << current_permutation[k] << " ";
                 }
                 std::cout << tmp << std::endl;*/
-                if (tmp <= min && !inTabuList(current_permutation)) { //TODO: I nie w liscie tabu
+                if (tmp <= min) { //TODO: I nie w liscie tabu
+                    te.i = i; te.j = j; //changed
                     min = tmp;
                     for (int i = 0; i < numberOfCities; i++) {
                         result_permutation[i] = current_permutation[i];
@@ -232,8 +228,17 @@ void TravellingSalesmanProblem::newSolution(int *result_permutation) {
             }
         }
     }
+    return te; //changed
 }
 
+bool TravellingSalesmanProblem::inTabuList(int i, int j) {
+    for (auto it = tabuList.begin(); it != tabuList.end(); ++it){
+        if ((it->i == i && it->j == j)||(it->i == j && it->j == i)) return true;
+    }
+    return false;
+}
+
+/*
 bool TravellingSalesmanProblem::inTabuList(int *current_permutation) {
     bool inTabu = false;
     for (auto it = tabuList.begin(); it != tabuList.end(); ++it){
@@ -249,6 +254,7 @@ bool TravellingSalesmanProblem::inTabuList(int *current_permutation) {
     }
     return false;
 }
+*/
 
 int TravellingSalesmanProblem::beginning(int *current_permutation) {
     bool *visited = new bool[numberOfCities];
@@ -279,8 +285,6 @@ int TravellingSalesmanProblem::beginning(int *current_permutation) {
     delete[] visited;
     return length;
 }
-
-
 
 void TravellingSalesmanProblem::permute(int *permutation, int left, int right, int &min, int *result) {
     if (left == right){
@@ -373,16 +377,24 @@ bool TravellingSalesmanProblem::loadFromFile(std::string filename) {
     fin.open(filename.c_str());
     if (filename.find(".atsp")!=std::string::npos){ //atsp
         std::string tmp;
+        int check = 15;
         do {
             fin >> tmp;
+            check--;
         }
-        while (tmp != "DIMENSION:");
+        while (tmp != "DIMENSION:" && check > 0);
+        if (check == 0) return false;
+
         fin >> numberOfCities;
         gm.createMatrix(numberOfCities);
+        check = 15;
         do {
             fin >> tmp;
+            check--;
         }
-        while (tmp != "EDGE_WEIGHT_SECTION");
+        while (tmp != "EDGE_WEIGHT_SECTION" && check > 0);
+        if (check == 0) return false;
+
         for (int i = 0; i < numberOfCities; i++){
             for (int j = 0; j < numberOfCities; j++){
                 int length;
@@ -395,16 +407,24 @@ bool TravellingSalesmanProblem::loadFromFile(std::string filename) {
     }
     else if (filename.find(".tsp")!=std::string::npos){ //tsp
         std::string tmp;
+        int check = 15;
         do {
             fin >> tmp;
+            check--;
         }
-        while (tmp != "DIMENSION:");
+        while (tmp != "DIMENSION:" && check > 0);
+        if (check == 0) return false;
+
         fin >> numberOfCities;
         gm.createMatrix(numberOfCities);
+        check = 15;
         do {
             fin >> tmp;
+            check--;
         }
-        while (tmp != "EDGE_WEIGHT_FORMAT:");
+        while (tmp != "EDGE_WEIGHT_FORMAT:"&& check > 0);
+        if (check == 0) return false;
+
         fin >> tmp;
         if (tmp.find("LOWER_DIAG_ROW")!=std::string::npos){
             do {
@@ -420,8 +440,9 @@ bool TravellingSalesmanProblem::loadFromFile(std::string filename) {
                     gm.setEdge(j,i,length);
                 }
             }
+            return true;
         }
-        return true;
+        else return false;
     }
     else if (filename.find(".txt")!=std::string::npos){
         fin >> numberOfCities;
@@ -556,4 +577,20 @@ double TravellingSalesmanProblem::testTime(int algorithmType) {
 
 TravellingSalesmanProblem::TravellingSalesmanProblem() {
 
+}
+
+void TravellingSalesmanProblem::setDiversification(bool diversification) {
+    TravellingSalesmanProblem::diversification = diversification;
+}
+
+void TravellingSalesmanProblem::setStopCriterium(double stopCriterium) {
+    TravellingSalesmanProblem::stopCriterium = stopCriterium;
+}
+
+void TravellingSalesmanProblem::setCurrentNeighbourhood(TravellingSalesmanProblem::neighbourhood currentNeighbourhood) {
+    TravellingSalesmanProblem::currentNeighbourhood = currentNeighbourhood;
+}
+
+void TravellingSalesmanProblem::setNumberOfIterations(int numberOfIterations) {
+    TravellingSalesmanProblem::numberOfIterations = numberOfIterations;
 }

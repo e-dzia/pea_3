@@ -11,8 +11,15 @@
 #include <vector>
 #include "Timer.h"
 
-struct TabuElement{
+/*struct TabuElement{
     int* solution;
+    int lifetime;
+};
+*/
+
+struct TabuElement{
+    int i;
+    int j;
     int lifetime;
 };
 
@@ -26,48 +33,43 @@ private:
 
     GraphMatrix gm;
     int numberOfCities;
-    bool diversification = true; //czy dywersyfikacja jest wlaczaona, 0 - nie, 1 - tak
+    bool diversification = false; //czy dywersyfikacja jest wlaczaona, 0 - nie, 1 - tak
     double stopCriterium = INT32_MAX; //czas w sekundach
     neighbourhood currentNeighbourhood = SWAP;
     std::vector<TabuElement> tabuList;
-    int numberOfIterations = 5000;
+    int numberOfIterations = 8000;
     int start = 0;
 
     void swap(int *permutation, int left, int right);
     void insert(int *permutation, int left, int right);
     void invert(int *permutation, int left, int right);
 
-    void newSolution(int *result_permutation);
+    TabuElement newSolution(int *result_permutation);
     void permute(int *permutation, int left, int right, int &min, int *result);
     int countPath(int *permutation);
 
 public:
     TravellingSalesmanProblem();
 
-    std::string bruteForce();
+    void setDiversification(bool diversification);
+    void setStopCriterium(double stopCriterium);
+    void setCurrentNeighbourhood(neighbourhood currentNeighbourhood);
+    void setNumberOfIterations(int numberOfIterations);
 
+    std::string bruteForce();
     std::string tabuSearch();
 
     bool loadFromFile(std::string filename);
-
+    void saveToFile(std::string filename);
     void generateRandom(int size);
 
     double testTime(int algorithmType);
-
-    void saveToFile(std::string filename);
-
     void menu();
 
-    bool inTabuList(int *current_permutation);
-
+    bool inTabuList(int i, int j);
     void restart(int *current_permutation);
-
     bool CriticalEvent(int number);
-
-    bool allVisited(bool *visited);
-
     void restart_random(int *permutation);
-
     int beginning(int *current_permutation);
 };
 
