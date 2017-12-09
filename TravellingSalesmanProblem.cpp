@@ -232,26 +232,9 @@ TabuElement TravellingSalesmanProblem::newSolution(int *result_permutation) {
 }
 
 bool TravellingSalesmanProblem::inTabuList(int i, int j) {
-    switch(currentNeighbourhood){
-        case SWAP:
-            for (auto &it : tabuList) {
-                if ((it.i == i && it.j == j)||(it.i == j && it.j == i)) //przypadki, w ktorych nie zamieniamy
-                    return true;
-            }
-            break;
-        case INSERT:
-            for (auto &it : tabuList) {
-                if (j == it.i && i == it.j)
-                    return true;
-            }
-            break;
-        case INVERT:
-            if (i < j) {int tmp = i; i = j; j = i;} //zawsze i > j
-            for (auto &it : tabuList) {
-                if(!((i < it.i && j < it.i)||(i > it.j && j > it.j))) //dwa przypadki, w których zamieniamy (z negacja)
-                    return true;
-            }
-            break;
+    for (auto &it : tabuList) {
+        if ((it.i == i && it.j == j)||(it.i == j && it.j == i)) //przypadki, w ktorych nie zamieniamy
+            return true;
     }
     return false;
 }
