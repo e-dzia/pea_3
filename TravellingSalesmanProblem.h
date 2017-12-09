@@ -24,21 +24,25 @@ struct TabuElement{
 };
 
 class TravellingSalesmanProblem{
-private:
+public:
     enum neighbourhood{
         SWAP = 0,
         INSERT = 1,
         INVERT = 2
     };
 
+
+private:
     GraphMatrix gm;
     int numberOfCities;
     bool diversification = false; //czy dywersyfikacja jest wlaczaona, 0 - nie, 1 - tak
     double stopCriterium = INT32_MAX; //czas w sekundach
     neighbourhood currentNeighbourhood = SWAP;
     std::vector<TabuElement> tabuList;
-    int numberOfIterations = 10000;
+    int numberOfIterations = 5000;
     int start = 0;
+
+    std::string currentFile;
 
     void swap(int *permutation, int left, int right);
     void insert(int *permutation, int left, int right);
@@ -49,6 +53,7 @@ private:
     int countPath(int *permutation);
 
 public:
+
     TravellingSalesmanProblem();
 
     void setDiversification(bool diversification);
@@ -56,7 +61,6 @@ public:
     void setCurrentNeighbourhood(neighbourhood currentNeighbourhood);
     void setNumberOfIterations(int numberOfIterations);
 
-    std::string bruteForce();
     std::string tabuSearch();
 
     bool loadFromFile(std::string filename);
