@@ -37,7 +37,7 @@ private:
     double stopCriterium = INT32_MAX; //czas w sekundach
     neighbourhood currentNeighbourhood = SWAP;
     std::vector<TabuElement> tabuList;
-    int numberOfIterations = 8000;
+    int numberOfIterations = 10000;
     int start = 0;
 
     void swap(int *permutation, int left, int right);
