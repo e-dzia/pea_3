@@ -39,7 +39,7 @@ private:
     double stopCriterium = INT32_MAX; //czas w sekundach
     neighbourhood currentNeighbourhood = SWAP;
     std::vector<TabuElement> tabuList;
-    int numberOfIterations = 5000;
+    int numberOfIterations = 500000;
     int start = 0;
 
     std::string currentFile;

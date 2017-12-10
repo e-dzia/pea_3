@@ -80,6 +80,7 @@ std::string TravellingSalesmanProblem::tabuSearch() {
 
     delete[] current_permutation;
     delete[] result_permutation;
+    tabuList.clear();
     return ss.str();
 }
 
@@ -297,7 +298,7 @@ bool TravellingSalesmanProblem::loadFromFile(std::string filename) {
     fin.open(filename.c_str());
     if (filename.find(".atsp")!=std::string::npos){ //atsp
         std::string tmp;
-        int check = 15;
+        int check = 20;
         do {
             fin >> tmp;
             check--;
@@ -307,7 +308,7 @@ bool TravellingSalesmanProblem::loadFromFile(std::string filename) {
 
         fin >> numberOfCities;
         gm.createMatrix(numberOfCities);
-        check = 15;
+        check = 20;
         do {
             fin >> tmp;
             check--;
@@ -319,7 +320,6 @@ bool TravellingSalesmanProblem::loadFromFile(std::string filename) {
             for (int j = 0; j < numberOfCities; j++){
                 int length;
                 fin >> length;
-                //if (length == -1) length = 0;
                 gm.setEdge(i,j,length);
             }
         }

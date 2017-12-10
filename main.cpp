@@ -14,7 +14,7 @@ int main() {
     //test();
 
     TravellingSalesmanProblem * tsp = new TravellingSalesmanProblem;
-    tsp->loadFromFile("ftv70.atsp");
+    tsp->loadFromFile("ft70.atsp");
 
     tsp->menu();
 
