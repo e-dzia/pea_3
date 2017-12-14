@@ -1,6 +1,3 @@
-//
-// Created by Edzia on 2017-11-06.
-//
 
 #include "Timer.h"
 

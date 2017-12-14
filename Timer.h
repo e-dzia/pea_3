@@ -1,6 +1,3 @@
-//
-// Created by Edzia on 2017-11-06.
-//
 
 #ifndef PEA_1_TIMER_H
 #define PEA_1_TIMER_H

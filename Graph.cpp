@@ -1,6 +1,4 @@
-//
-// Created by Edzia on 2017-04-29.
-//
+
 
 #include "Graph.h"
 

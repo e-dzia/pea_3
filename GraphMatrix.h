@@ -1,6 +1,3 @@
-//
-// Created by Edzia on 2017-04-29.
-//
 
 #ifndef SDIZO_2_GRAPHMATRIX_H
 #define SDIZO_2_GRAPHMATRIX_H

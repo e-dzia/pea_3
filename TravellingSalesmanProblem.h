@@ -1,7 +1,3 @@
-//
-// Created by Edzia on 2017-05-21.
-//
-
 #ifndef SDIZO_3_TRAVELLINGSALESMANPROBLEM_H
 #define SDIZO_3_TRAVELLINGSALESMANPROBLEM_H
 
@@ -10,12 +6,6 @@
 #include <fstream>
 #include <vector>
 #include "Timer.h"
-
-/*struct TabuElement{
-    int* solution;
-    int lifetime;
-};
-*/
 
 struct TabuElement{
     int i;
@@ -36,13 +26,11 @@ private:
     GraphMatrix gm;
     int numberOfCities;
     bool diversification = false; //czy dywersyfikacja jest wlaczaona, 0 - nie, 1 - tak
-    double stopCriterium = INT32_MAX; //czas w sekundach
+    double stopCriterium = 10; //czas w sekundach
     neighbourhood currentNeighbourhood = SWAP;
     std::vector<TabuElement> tabuList;
-    int numberOfIterations = 500000;
+    int numberOfIterations = INT32_MAX;
     int start = 0;
-
-    std::string currentFile;
 
     void swap(int *permutation, int left, int right);
     void insert(int *permutation, int left, int right);
@@ -62,6 +50,8 @@ public:
     void setNumberOfIterations(int numberOfIterations);
 
     std::string tabuSearch();
+
+    bool searchInFile(std::ifstream &fin, std::string toFind);
 
     bool loadFromFile(std::string filename);
     void saveToFile(std::string filename);
