@@ -23,7 +23,7 @@ public:
 
 
 private:
-    GraphMatrix gm;
+    GraphMatrix citiesDistances;
     int numberOfCities;
     bool diversification = false; //czy dywersyfikacja jest wlaczaona, 0 - nie, 1 - tak
     double stopCriterium = 10; //czas w sekundach
@@ -50,8 +50,6 @@ public:
     void setNumberOfIterations(int numberOfIterations);
 
     std::string tabuSearch();
-
-    bool searchInFile(std::ifstream &fin, std::string toFind);
 
     bool loadFromFile(std::string filename);
     void saveToFile(std::string filename);

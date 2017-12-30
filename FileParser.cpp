@@ -6,7 +6,20 @@
 #include "FileParser.h"
 
 bool FileParser::parse(const std::string &filename) {
-    fin.open(filename.c_str());
+    this->filename = filename;
+    parse();
+}
+
+bool FileParser::parse() {
+    if (filename.empty()) {
+        return false;
+    }
+
+    fin.open(this->filename.c_str());
+    if (!fin.is_open()) {
+        return false;
+    }
+
     if (filename.find(".atsp")!=std::string::npos){
         return atsp();
     }
@@ -16,7 +29,7 @@ bool FileParser::parse(const std::string &filename) {
     else if (filename.find(".txt")!=std::string::npos){
         return txt();
     }
-    return false;
+    else return false;
 }
 
 bool FileParser::atsp() {
@@ -24,7 +37,7 @@ bool FileParser::atsp() {
     if (!searchInFile("DIMENSION:")) return false;
 
     fin >> numberOfCities;
-    gm.createMatrix(numberOfCities);
+    graphMatrix.createMatrix(numberOfCities);
 
     if (!searchInFile("EDGE_WEIGHT_TYPE:")) return false;
     if (!searchInFile("EXPLICIT")) return false;
@@ -40,7 +53,7 @@ bool FileParser::tsp() {
     if (!searchInFile("DIMENSION:")) return false;
 
     fin >> numberOfCities;
-    gm.createMatrix(numberOfCities);
+    graphMatrix.createMatrix(numberOfCities);
 
     if (!searchInFile("EDGE_WEIGHT_TYPE:")) return false;
     fin >> tmp;
@@ -56,7 +69,7 @@ bool FileParser::tsp() {
 
 bool FileParser::txt() {
     fin >> numberOfCities;
-    gm.createMatrix(numberOfCities);
+    graphMatrix.createMatrix(numberOfCities);
     return fullMatrix();
 }
 
@@ -109,8 +122,8 @@ bool FileParser::euc2d() {
             double xDistance = eucCoord[i][0] - eucCoord[j][0];
             double yDistance = eucCoord[i][1] - eucCoord[j][1];
             int distance = static_cast<int>(round(sqrt(xDistance * xDistance + yDistance * yDistance)));
-            gm.setEdge(i, j, distance);
-            gm.setEdge(j, i, distance);
+            graphMatrix.setEdge(i, j, distance);
+            graphMatrix.setEdge(j, i, distance);
         }
     }
     delete[] eucCoord;
@@ -122,8 +135,8 @@ bool FileParser::lowerDiagRow() {
         for (int j = 0; j <= i; j++) {
             int length;
             fin >> length;
-            gm.setEdge(i, j, length);
-            gm.setEdge(j, i, length);
+            graphMatrix.setEdge(i, j, length);
+            graphMatrix.setEdge(j, i, length);
         }
     }
     return true;
@@ -134,7 +147,7 @@ bool FileParser::fullMatrix() {
         for (int j = 0; j < numberOfCities; j++) {
             int length;
             fin >> length;
-            gm.setEdge(i, j, length);
+            graphMatrix.setEdge(i, j, length);
         }
     }
     return true;
@@ -145,9 +158,18 @@ bool FileParser::upperDiagRow() {
         for (int j = i; j < numberOfCities; j++) {
             int length;
             fin >> length;
-            gm.setEdge(i, j, length);
-            gm.setEdge(j, i, length);
+            graphMatrix.setEdge(i, j, length);
+            graphMatrix.setEdge(j, i, length);
         }
     }
     return true;
 }
+
+const GraphMatrix &FileParser::getGraphMatrix() const {
+    return graphMatrix;
+}
+
+int FileParser::getNumberOfCities() const {
+    return numberOfCities;
+}
+

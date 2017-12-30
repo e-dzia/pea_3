@@ -1,4 +1,5 @@
 #include "TravellingSalesmanProblem.h"
+#include "FileParser.h"
 #include <sstream>
 #include <chrono>
 #include <cmath>
@@ -111,8 +112,8 @@ void TravellingSalesmanProblem::restart(int *current_permutation) { //restart - 
         int min = INT32_MAX;
         int position = -1;
         for (int j = 0; j < numberOfCities; j++){ //szukanie minimum od obecnej pozycji
-            if (!visited[j] && gm.getEdgeLength(k,j) != -1 && gm.getEdgeLength(k,j) < min){
-                min = gm.getEdgeLength(k,j);
+            if (!visited[j] && citiesDistances.getEdgeLength(k,j) != -1 && citiesDistances.getEdgeLength(k,j) < min){
+                min = citiesDistances.getEdgeLength(k,j);
                 position = j;
             }
         }
@@ -187,8 +188,8 @@ int TravellingSalesmanProblem::beginning(int *current_permutation) { //zwykly al
         int min = INT32_MAX;
         int position = -1;
         for (int j = 0; j < numberOfCities; j++){ //szukanie minimum od obecnej pozycji
-            if (!visited[j] && gm.getEdgeLength(k,j) != -1 && gm.getEdgeLength(k,j) < min){
-                min = gm.getEdgeLength(k,j);
+            if (!visited[j] && citiesDistances.getEdgeLength(k,j) != -1 && citiesDistances.getEdgeLength(k,j) < min){
+                min = citiesDistances.getEdgeLength(k,j);
                 position = j;
             }
         }
@@ -196,7 +197,7 @@ int TravellingSalesmanProblem::beginning(int *current_permutation) { //zwykly al
         k = position;
         current_permutation[i] = position;
     }
-    length += gm.getEdgeLength(k,start);
+    length += citiesDistances.getEdgeLength(k,start);
 
     delete[] visited;
     return length;
@@ -266,10 +267,10 @@ int TravellingSalesmanProblem::countPath(int *permutation) {
      }
      std::cout << std::endl;*/
     for (int i = 1; i < numberOfCities; i++){
-        length += gm.getEdgeLength(permutation[i-1],permutation[i]);
+        length += citiesDistances.getEdgeLength(permutation[i-1],permutation[i]);
         end = i;
     }
-    length += gm.getEdgeLength(permutation[end],permutation[0]);
+    length += citiesDistances.getEdgeLength(permutation[end],permutation[0]);
 
     return length;
 }
@@ -280,147 +281,24 @@ void TravellingSalesmanProblem::saveToFile(std::string filename) {
     fout << numberOfCities << std::endl;
     for (int i = 0; i < numberOfCities; i++){
         for (int j = 0; j < numberOfCities; j++){
-            int length = gm.getEdgeLength(i,j);
+            int length = citiesDistances.getEdgeLength(i,j);
             fout << length << " ";
         }
         fout << std::endl;
     }
 }
 
-bool TravellingSalesmanProblem::searchInFile(std::ifstream &fin, std::string toFind){
-    std::string tmp;
-    std::string toFind2;
-    if (toFind.substr(toFind.size()-1,1)==":"){
-        toFind2 = toFind.substr(0,toFind.size()-1);
-    }
-    int check = 20;
-    do {
-        fin >> tmp;
-        check--;
-    }
-    while (tmp != toFind && tmp != toFind2  && check > 0);
-    if (check == 0) return false;
-    return true;
-}
-
 bool TravellingSalesmanProblem::loadFromFile(std::string filename) {
-    std::ifstream fin;
-    fin.open(filename.c_str());
-    if (filename.find(".atsp")!=std::string::npos){ //atsp
-        std::string tmp;
-        if (!searchInFile(fin,"DIMENSION:")) return false;
-
-        fin >> numberOfCities;
-        gm.createMatrix(numberOfCities);
-
-        if (!searchInFile(fin,"EDGE_WEIGHT_TYPE:")) return false;
-        if (!searchInFile(fin,"EXPLICIT")) return false;
-        if (!searchInFile(fin,"EDGE_WEIGHT_FORMAT:")) return false;
-        if (!searchInFile(fin,"FULL_MATRIX")) return false;
-
-        if (!searchInFile(fin,"EDGE_WEIGHT_SECTION")) return false;
-        for (int i = 0; i < numberOfCities; i++){
-            for (int j = 0; j < numberOfCities; j++){
-                int length;
-                fin >> length;
-                gm.setEdge(i,j,length);
-            }
-        }
-        return true;
-    }
-    else if (filename.find(".tsp")!=std::string::npos) { //tsp
-        std::string tmp;
-        if (!searchInFile(fin, "DIMENSION:")) return false;
-
-        fin >> numberOfCities;
-        gm.createMatrix(numberOfCities);
-
-        if (!searchInFile(fin, "EDGE_WEIGHT_TYPE:")) return false;
-        fin >> tmp;
-        if (tmp == ":") fin >> tmp;
-        if (tmp == "EXPLICIT") {
-            if (!searchInFile(fin, "EDGE_WEIGHT_FORMAT:")) return false;
-            fin >> tmp;
-            if (tmp.find("LOWER_DIAG_ROW") != std::string::npos) {
-                if (!searchInFile(fin, "EDGE_WEIGHT_SECTION")) return false;
-
-                for (int i = 0; i < numberOfCities; i++) {
-                    for (int j = 0; j <= i; j++) {
-                        int length;
-                        fin >> length;
-                        gm.setEdge(i, j, length);
-                        gm.setEdge(j, i, length);
-                    }
-                }
-                return true;
-            } else if (tmp.find("FULL_MATRIX") != std::string::npos) {
-                if (!searchInFile(fin, "EDGE_WEIGHT_SECTION")) return false;
-
-                for (int i = 0; i < numberOfCities; i++) {
-                    for (int j = 0; j < numberOfCities; j++) {
-                        int length;
-                        fin >> length;
-                        gm.setEdge(i, j, length);
-                    }
-                }
-                return true;
-            } else if (tmp.find("UPPER_DIAG_ROW") != std::string::npos) {
-                if (!searchInFile(fin, "EDGE_WEIGHT_SECTION")) return false;
-
-                for (int i = 0; i < numberOfCities; i++) {
-                    for (int j = i; j < numberOfCities; j++) {
-                        int length;
-                        fin >> length;
-                        gm.setEdge(i, j, length);
-                        gm.setEdge(j, i, length);
-                    }
-                }
-                return true;
-            } else return false;
-        } else if (tmp == "EUC_2D") {
-            if (!searchInFile(fin, "NODE_COORD_SECTION")) return false;
-
-            double **eucCoord = new double *[numberOfCities];
-            for (int i = 0; i < numberOfCities; i++) {
-                eucCoord[i] = new double[2];
-                int n;
-                fin >> n;
-                fin >> eucCoord[i][0] >> eucCoord[i][1];
-            }
-
-            for (int i = 0; i < numberOfCities; i++) {
-                for (int j = 0; j <= i; j++) {
-                    double xDistance = eucCoord[i][0] - eucCoord[j][0];
-                    double yDistance = eucCoord[i][1] - eucCoord[j][1];
-                    int distance = (int) sqrt(xDistance * xDistance + yDistance * yDistance);
-                    gm.setEdge(i, j, distance);
-                    gm.setEdge(j, i, distance);
-                }
-            }
-            delete[] eucCoord;
-            return true;
-        }
-    }
-    else if (filename.find(".txt")!=std::string::npos){
-        fin >> numberOfCities;
-        gm.createMatrix(numberOfCities);
-        for (int i = 0; i < numberOfCities; i++){
-            for (int j = 0; j < numberOfCities; j++){
-                int length;
-                fin >> length;
-                //if (length == -1) length = 0;
-                gm.setEdge(i,j,length);
-            }
-        }
-        return true;
-    }
-    return false;
+    FileParser fileParser;
+    fileParser.parse(filename);
+    citiesDistances = fileParser.getGraphMatrix();
+    numberOfCities = fileParser.getNumberOfCities();
 }
 
 void TravellingSalesmanProblem::generateRandom(int size) {
     numberOfCities = size;
-    gm.createRandom(numberOfCities,100);
-    //gm.makeBothWaysEqual();
+    citiesDistances.createRandom(numberOfCities,100);
+    //citiesDistances.makeBothWaysEqual();
 }
 
 void TravellingSalesmanProblem::menu() {

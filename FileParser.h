@@ -13,7 +13,9 @@ class FileParser {
 private:
     std::ifstream fin = nullptr;
     int numberOfCities = 0;
-    GraphMatrix gm = nullptr;
+    std::string filename = "";
+
+    GraphMatrix graphMatrix = nullptr;
 
     bool atsp();
     bool tsp();
@@ -28,11 +30,19 @@ private:
     bool upperDiagRow();
 
 public:
+    FileParser() = default;
+
     explicit FileParser(const std::string &filename){
         fin.open(filename.c_str());
     }
 
+    bool parse();
+
     bool parse(const std::string &filename);
+
+    const GraphMatrix &getGraphMatrix() const;
+    int getNumberOfCities() const;
+
 
 };
 
