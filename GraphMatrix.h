@@ -7,13 +7,12 @@
 
 class GraphMatrix: public Graph{
 private:
-    int **matrix;
+    int **matrix = nullptr;
     void countEdges() override;
-
 
 public:
     GraphMatrix();
-    ~GraphMatrix();
+    ~GraphMatrix() override;
 
     void createMatrix(int size);
 
@@ -28,6 +27,7 @@ public:
 
     int getEdgeLength(int start, int end) override;
 
+    GraphMatrix& operator=(GraphMatrix graphMatrix);
 
 };
 

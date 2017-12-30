@@ -7,7 +7,7 @@
 
 bool FileParser::parse(const std::string &filename) {
     this->filename = filename;
-    parse();
+    return parse();
 }
 
 bool FileParser::parse() {
@@ -19,6 +19,7 @@ bool FileParser::parse() {
     if (!fin.is_open()) {
         return false;
     }
+
 
     if (filename.find(".atsp")!=std::string::npos){
         return atsp();
@@ -165,11 +166,24 @@ bool FileParser::upperDiagRow() {
     return true;
 }
 
-const GraphMatrix &FileParser::getGraphMatrix() const {
+const GraphMatrix FileParser::getGraphMatrix(){
     return graphMatrix;
 }
 
 int FileParser::getNumberOfCities() const {
     return numberOfCities;
 }
+
+const std::string &FileParser::getFilename() const {
+    return filename;
+}
+
+void FileParser::setFilename(const std::string &filename) {
+    FileParser::filename = filename;
+}
+
+FileParser::FileParser(GraphMatrix gm) {
+    graphMatrix = gm;
+}
+
 

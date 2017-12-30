@@ -6,13 +6,14 @@ GraphMatrix::GraphMatrix() {
     vertexes = 0;
     edges = 0;
     density = 0;
-    matrix = NULL;
+    matrix = nullptr;
 }
 
 GraphMatrix::~GraphMatrix() {
-    if (matrix != NULL){
+    //std::cout << *this;
+    if (matrix != nullptr){
         for (int i = 0; i < vertexes; i++){
-            if (matrix[i] != NULL) delete[] matrix[i];
+            if (matrix[i] != nullptr) delete[] matrix[i];
         }
         delete[] matrix;
     }
@@ -62,9 +63,9 @@ void GraphMatrix::print(std::ostream &str) const {
 }
 
 void GraphMatrix::createMatrix(int v) {
-    if (matrix != NULL) {
+    if (matrix != nullptr) {
         for (int i = 0; i < vertexes; i++){
-            if (matrix[i] != NULL) delete[] matrix[i];
+            if (matrix[i] != nullptr) delete[] matrix[i];
         }
         delete[] matrix;
     }
@@ -137,6 +138,19 @@ void GraphMatrix::setEdge(int start, int end, int length) {
 
 int GraphMatrix::getEdgeLength(int start, int end) {
     return matrix[start][end];
+}
+
+GraphMatrix& GraphMatrix::operator=(GraphMatrix graphMatrix) {
+    this->createMatrix(graphMatrix.vertexes);
+    this->vertexes = graphMatrix.vertexes;
+    this->edges = graphMatrix.edges;
+    this->density = graphMatrix.density;
+    for (int i = 0; i < graphMatrix.vertexes; i++){
+        for (int j = 0; j < graphMatrix.vertexes; j++){
+            this->matrix[i][j] = graphMatrix.matrix[i][j];
+        }
+    }
+    return *this;
 }
 
 

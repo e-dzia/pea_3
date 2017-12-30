@@ -290,9 +290,13 @@ void TravellingSalesmanProblem::saveToFile(std::string filename) {
 
 bool TravellingSalesmanProblem::loadFromFile(std::string filename) {
     FileParser fileParser;
-    fileParser.parse(filename);
-    citiesDistances = fileParser.getGraphMatrix();
-    numberOfCities = fileParser.getNumberOfCities();
+    if (fileParser.parse(filename)){
+        citiesDistances = fileParser.getGraphMatrix();
+        //std::cout << citiesDistances;
+        numberOfCities = fileParser.getNumberOfCities();
+        return true;
+    }
+    else return false;
 }
 
 void TravellingSalesmanProblem::generateRandom(int size) {

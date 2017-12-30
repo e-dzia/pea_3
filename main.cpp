@@ -16,7 +16,6 @@ int main() {
     tsp->menu();
     delete tsp;
 
-
     return 0;
 }
 
