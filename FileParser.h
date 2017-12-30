@@ -7,15 +7,32 @@
 
 #include <string>
 #include <fstream>
+#include "GraphMatrix.h"
 
 class FileParser {
+private:
     std::ifstream fin = nullptr;
+    int numberOfCities = 0;
+    GraphMatrix gm = nullptr;
 
-    explicit FileParser(std::string filename){
+    bool atsp();
+    bool tsp();
+    bool txt();
+
+    bool searchInFile(std::string toFind);
+
+    bool explicitFile();
+    bool euc2d();
+    bool lowerDiagRow();
+    bool fullMatrix();
+    bool upperDiagRow();
+
+public:
+    explicit FileParser(const std::string &filename){
         fin.open(filename.c_str());
     }
 
-    
+    bool parse(const std::string &filename);
 
 };
 
