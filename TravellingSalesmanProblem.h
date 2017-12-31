@@ -15,22 +15,39 @@ struct TabuElement{
 
 class TravellingSalesmanProblem{
 public:
-    enum neighbourhood{
+    enum Neighbourhood{
         SWAP = 0,
         INSERT = 1,
         INVERT = 2
     };
 
+    enum CrosoverMethod{
+
+    };
+
+    enum MutationMethod{
+
+    };
+
+
 
 private:
     GraphMatrix citiesDistances;
     int numberOfCities;
-    bool diversification = false; //czy dywersyfikacja jest wlaczaona, 0 - nie, 1 - tak
     double stopCriterium = 10; //czas w sekundach
-    neighbourhood currentNeighbourhood = SWAP;
-    std::vector<TabuElement> tabuList;
+    int sizeOfPopulation = 10;
+    double mutationRate = 0.5;
+    double crossoverRate = 0.5;
+    CrosoverMethod crossoverMethod;
+    MutationMethod mutationMethod;
+
     int numberOfIterations = INT32_MAX;
     int start = 0;
+
+    bool diversification = false; //czy dywersyfikacja jest wlaczaona, 0 - nie, 1 - tak
+    Neighbourhood currentNeighbourhood = SWAP;
+    std::vector<TabuElement> tabuList;
+
 
     void swap(int *permutation, int left, int right);
     void insert(int *permutation, int left, int right);
@@ -46,10 +63,11 @@ public:
 
     void setDiversification(bool diversification);
     void setStopCriterium(double stopCriterium);
-    void setCurrentNeighbourhood(neighbourhood currentNeighbourhood);
+    void setCurrentNeighbourhood(Neighbourhood currentNeighbourhood);
     void setNumberOfIterations(int numberOfIterations);
 
     std::string tabuSearch();
+    std::string geneticAlgorithm();
 
     bool loadFromFile(std::string filename);
     void saveToFile(std::string filename);

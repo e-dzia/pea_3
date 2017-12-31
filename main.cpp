@@ -32,7 +32,7 @@ void test(){
         filename = "res_"; filename += i; filename += ".txt";
         fout.open(filename);
         for (int j = 0; j < 3; j++){ //sasiedztwo
-            tsp->setCurrentNeighbourhood(static_cast<TravellingSalesmanProblem::neighbourhood>(j));
+            tsp->setCurrentNeighbourhood(static_cast<TravellingSalesmanProblem::Neighbourhood>(j));
             for (int k = 0; k < 2; k++){ //dywersyfikacja
                 tsp->setDiversification(static_cast<bool>(k));
                 for (double time : times) { //czas wykonania programu

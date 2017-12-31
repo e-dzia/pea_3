@@ -4,6 +4,26 @@
 #include <chrono>
 #include <cmath>
 
+std::string TravellingSalesmanProblem::geneticAlgorithm() {
+    Timer t;
+    t.start();
+
+    int *result_permutation = new int[numberOfCities]; //przechowuje najlepsza znana permutacje miast
+
+
+    std::stringstream ss;
+    ss << "Algorytm tabu search.\nWynik " << std::endl;
+    for (int i = 0; i < numberOfCities; i++){
+        ss << result_permutation[i] << " ";
+    }
+    ss << ": " << length << std::endl;
+
+    delete[] current_permutation;
+    delete[] result_permutation;
+    tabuList.clear();
+    return ss.str();
+}
+
 std::string TravellingSalesmanProblem::tabuSearch() {
     tabuList.clear();
     Timer t;
@@ -410,10 +430,11 @@ void TravellingSalesmanProblem::setStopCriterium(double stopCriterium) {
     TravellingSalesmanProblem::stopCriterium = stopCriterium;
 }
 
-void TravellingSalesmanProblem::setCurrentNeighbourhood(TravellingSalesmanProblem::neighbourhood currentNeighbourhood) {
+void TravellingSalesmanProblem::setCurrentNeighbourhood(TravellingSalesmanProblem::Neighbourhood currentNeighbourhood) {
     TravellingSalesmanProblem::currentNeighbourhood = currentNeighbourhood;
 }
 
 void TravellingSalesmanProblem::setNumberOfIterations(int numberOfIterations) {
     TravellingSalesmanProblem::numberOfIterations = numberOfIterations;
 }
+
