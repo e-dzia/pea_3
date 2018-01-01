@@ -4,12 +4,14 @@
 #include <sstream>
 #include <chrono>
 #include <cmath>
+#include <algorithm>
+#include <cstdlib>
 
 std::string TravellingSalesmanProblem::geneticAlgorithm() {
     Timer t;
     t.start();
 
-    for(int i = 0; i < populationSize; i++){
+    for(int i = 0; i < populationSize+5; i++){
         Path path;
         path.setRandom();
         population.push_back(path);
@@ -17,9 +19,6 @@ std::string TravellingSalesmanProblem::geneticAlgorithm() {
             bestInPopulation = path;
         }
     }
-
-    std::cout << bestInPopulation << " " << bestInPopulation.getLength() << "\n";
-
 
     int nOI = 0;
     while (/*t.getWithoutStopping() < stopCriterium && */ nOI++ < numberOfIterations){
@@ -52,14 +51,10 @@ void TravellingSalesmanProblem::mutation() {
         if (tmp <= mutationRate*100){
             switch(mutationMethod){
                 case INSERT:
-                    std::cout << p;
                     p.insert(rand()%numberOfCities,rand()%numberOfCities);
-                    std::cout << p << "MUTACJA_END\n";
                     break;
                 case INVERT:
-                    std::cout << p;
                     p.invert(rand()%numberOfCities,rand()%numberOfCities);
-                    std::cout << p << "MUTACJA_END\n";
                     break;
             }
         }
@@ -67,14 +62,35 @@ void TravellingSalesmanProblem::mutation() {
 }
 
 void TravellingSalesmanProblem::newPopulation() {
-
+    sortPopulation();
+    if (population.size() > populationSize){
+        deleteDuplicates();
+    }
+    if (population.size() > populationSize){
+        deleteWorst();
+    }
 }
-
 
 void TravellingSalesmanProblem::checkBest() {
     for (const Path &p: population){
         if (p.getLength() < bestInPopulation.getLength()){
             bestInPopulation = p;
+        }
+    }
+}
+
+void TravellingSalesmanProblem::sortPopulation() {
+    std::sort(population.begin(), population.end());
+}
+
+void TravellingSalesmanProblem::deleteDuplicates() {
+    population.erase( unique( population.begin(), population.end() ), population.end() );
+}
+
+void TravellingSalesmanProblem::deleteWorst() {
+    if (population.size() > populationSize){
+        for (int i = populationSize; i < population.size();){
+            population.pop_back();
         }
     }
 }
@@ -153,7 +169,7 @@ int TravellingSalesmanProblem::beginning(int *current_permutation) { //zwykly al
     return length;
 }
 
-void TravellingSalesmanProblem::permute(int *permutation, int left, int right, int &min, int *result) {
+/*void TravellingSalesmanProblem::permute(int *permutation, int left, int right, int &min, int *result) {
     if (left == right){
         int length = countPath(permutation);
         if (length < min){
@@ -174,57 +190,7 @@ void TravellingSalesmanProblem::permute(int *permutation, int left, int right, i
     }
 
 }
-
-void TravellingSalesmanProblem::swap(int *permutation, int left, int right) {
-    if (right == left) return;
-    int tmp = permutation[left];
-    permutation[left] = permutation[right];
-    permutation[right] = tmp;
-}
-
-void TravellingSalesmanProblem::insert(int *permutation, int left, int right) {
-    if (right == left) return;
-    if (right < left){
-        int tmp = permutation[left];
-        for (int i = left; i > right; i--){
-            permutation[i] = permutation[i-1];
-        }
-        permutation[right] = tmp;
-    }
-    else {
-        int tmp = permutation[left];
-        for (int i = left; i < right; i++){
-            permutation[i] = permutation[i+1];
-        }
-        permutation[right] = tmp;
-    }
-
-}
-
-void TravellingSalesmanProblem::invert(int *permutation, int left, int right) {
-    if (right == left) return;
-    if (right < left){int tmp = left; left = right; right = tmp;}
-    for (int i = 0; i < (right - left +1)/2; i++){
-        swap(permutation,left+i,right-i);
-    }
-}
-
-int TravellingSalesmanProblem::countPath(int *permutation) {
-    int length = 0;
-    int end;
-    /* for (int i = 0; i < numberOfCities; i++){
-         std:: cout << permutation[i];
-     }
-     std::cout << std::endl;*/
-    for (int i = 1; i < numberOfCities; i++){
-        length += citiesDistances.getEdgeLength(permutation[i-1],permutation[i]);
-        end = i;
-    }
-    length += citiesDistances.getEdgeLength(permutation[end],permutation[0]);
-
-    return length;
-}
-
+*/
 void TravellingSalesmanProblem::saveToFile(std::string filename) {
     std::ofstream fout;
     fout.open(filename.c_str());
@@ -398,4 +364,10 @@ void TravellingSalesmanProblem::setCrossoverMethod(TravellingSalesmanProblem::Cr
 
 void TravellingSalesmanProblem::setMutationMethod(TravellingSalesmanProblem::MutationMethod mutationMethod) {
     TravellingSalesmanProblem::mutationMethod = mutationMethod;
+}
+
+void TravellingSalesmanProblem::printPopulation() {
+    for (Path p: population){
+        std::cout << p.getLength() << " ##### " << p;
+    }
 }

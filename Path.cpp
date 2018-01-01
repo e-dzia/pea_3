@@ -95,8 +95,12 @@ void Path::setRandom() {
     delete[] visited;
 }
 
-bool Path::isShorter(Path p) {
+bool Path::isShorter(const Path& p)const {
     return this->length < p.getLength();
+}
+
+bool Path::operator<(const Path& p) const{
+    return this->isShorter(p);
 }
 
 int Path::getLength() const {
@@ -127,5 +131,12 @@ Path::Path(const Path &p) {
 void Path::initialize() {
     permutation = nullptr;
     if (numberOfCities > 0) permutation = new int[numberOfCities];
+}
+
+bool Path::operator==(const Path &p) const {
+    for (int i = 0; i < numberOfCities; i++){
+        if (permutation[i] != p[i]) return false;
+    }
+    return true;
 }
 

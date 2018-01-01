@@ -22,7 +22,9 @@ public:
     static GraphMatrix citiesDistances;
     static int numberOfCities;
 
-    bool isShorter(Path p);
+    bool isShorter(const Path& p)const;
+    bool operator<(const Path& p) const;
+    bool operator==(const Path& p) const;
 
     void swap(int left, int right);
     void insert(int left, int right);

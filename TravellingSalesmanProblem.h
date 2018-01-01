@@ -31,10 +31,10 @@ private:
     CrosoverMethod crossoverMethod = XX;
     MutationMethod mutationMethod = INVERT;
 
-    int numberOfIterations = 100; //for debugging
+    int numberOfIterations = 1; //for debugging
     int start = 0;
 
-    void permute(int *permutation, int left, int right, int &min, int *result);
+    //void permute(int *permutation, int left, int right, int &min, int *result);
 
     std::vector<Path> population;
     Path bestInPopulation;
@@ -70,8 +70,14 @@ public:
     void crossover();
     void mutation();
     void newPopulation();
-
     void checkBest();
+
+    void sortPopulation();
+    void deleteDuplicates();
+
+    void deleteWorst();
+
+    void printPopulation();
 };
 
 
