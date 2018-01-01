@@ -1,5 +1,6 @@
 #include "TravellingSalesmanProblem.h"
 #include "FileParser.h"
+#include "Path.h"
 #include <sstream>
 #include <chrono>
 #include <cmath>
@@ -8,89 +9,27 @@ std::string TravellingSalesmanProblem::geneticAlgorithm() {
     Timer t;
     t.start();
 
-    int *result_permutation = new int[numberOfCities]; //przechowuje najlepsza znana permutacje miast
+    bestInPopulation.setCitiesDistances(citiesDistances);
 
-
-    std::stringstream ss;
-    ss << "Algorytm tabu search.\nWynik " << std::endl;
-    for (int i = 0; i < numberOfCities; i++){
-        ss << result_permutation[i] << " ";
-    }
-    ss << ": " << length << std::endl;
-
-    delete[] current_permutation;
-    delete[] result_permutation;
-    tabuList.clear();
-    return ss.str();
-}
-
-std::string TravellingSalesmanProblem::tabuSearch() {
-    tabuList.clear();
-    Timer t;
-    t.start();
-    int *current_permutation = new int[numberOfCities]; //przechowuje aktualnie analizowana permutacje miast
-
-    //pierwsza permutacja - algorytm zachlanny
-    int length = beginning(current_permutation); //przechowuje najlepsza znana dotychczas dlugosc
-
-    int *result_permutation = new int[numberOfCities]; //przechowuje najlepsza znana permutacje miast
-    for (int i = 0; i < numberOfCities; i++){
-        result_permutation[i] = current_permutation[i];
+    for(int i = 0; i < populationSize; i++){
+        Path path;
+        path.setRandom();
+        population.push_back(path);
     }
 
-    //int nOI = numberOfIterations; //liczba iteracji glownej petli - uzywana do debuggowania
-    int numberOfIterationsWithoutChange = numberOfCities*3; //maksymalna liczba iteracji bez zmiany - dywersyfikacja
-    while (/*nOI-->0 && */t.getWithoutStopping() < stopCriterium){
-        //nowe rozwiazanie - najlepsze z sasiedztwa
-        TabuElement te = newSolution(current_permutation); //zwraca zmienione i, j
-
-        int tmp = countPath(current_permutation); //dlugosc znalezionej trasy
-
-        if (tmp < length){ //jesli rozwiazanie jest lepsze, to je zmienia na nowe
-            numberOfIterationsWithoutChange = numberOfCities*3;
-            length = tmp;
-            for (int i = 0; i < numberOfCities; i++){
-                result_permutation[i] = current_permutation[i];
-            }
-        }
-
-        //aktualizacja listy tabu: zmniejszenie kadencji i usuniecie zbednych pozycji
-        for(auto it = tabuList.begin(); it != tabuList.end(); ++it) {
-            it->lifetime--;
-
-            if (it->lifetime == 0){
-                tabuList.erase(it);
-                --it;
-            }
-        }
-
-        //dodaj nowe elementy do listy tabu
-        if (tabuList.size() < numberOfCities*2){ //maksymalny rozmiar listy tabu
-            te.lifetime = numberOfCities*2;
-            tabuList.push_back(te);
-        }
-
-
-        //Dywersyfikacja; jeśli lepsze po restarcie, to podmien
-        if(diversification && CriticalEvent(numberOfIterationsWithoutChange)){
-            restart(current_permutation);
-            tmp = countPath(current_permutation);
-
-            numberOfIterationsWithoutChange = numberOfCities*3;
-            if (tmp <= length){
-                length = tmp;
-                for (int i = 0; i < numberOfCities; i++){
-                    result_permutation[i] = current_permutation[i];
-                }
-            }
-        }
-        numberOfIterationsWithoutChange--;
+    int nOI = 0;
+    while (/*t.getWithoutStopping() < stopCriterium && */ nOI++ < numberOfIterations){
+        /*chooseMatingPool();
+        pairMatingPool();
+        crossover();
+        mutation();
+        newPopulation();*/
     }
 
     std::stringstream ss;
     ss << "Algorytm tabu search.\nWynik " << std::endl;
     for (int i = 0; i < numberOfCities; i++){
-        ss << result_permutation[i] << " ";
+        ss << bestInPopulation;
     }
     ss << ": " << length << std::endl;
 
@@ -141,56 +80,6 @@ void TravellingSalesmanProblem::restart(int *current_permutation) { //restart - 
         current_permutation[i] = position;
     }
     delete[] visited;
-}
-
-bool TravellingSalesmanProblem::CriticalEvent(int number) {
-    return (number <= 0);
-}
-
-/*
- * Znajduje najlepsze rozwiazanie w okolicy
- * */
-TabuElement TravellingSalesmanProblem::newSolution(int *result_permutation) {
-    TabuElement te;
-    int min = INT32_MAX;
-    int *current_permutation = new int[numberOfCities]; //obecna permutacja
-    for (int i = 0; i < numberOfCities; i++) current_permutation[i] = result_permutation[i];
-
-    for (int i = 1; i < numberOfCities-1; i++){
-        for (int j = 1; j < numberOfCities -1; j++) {
-            if (i != j && !inTabuList(i, j)) {
-                switch(currentNeighbourhood){
-                    case SWAP: swap(current_permutation, i, j); break;
-                    case INSERT: insert(current_permutation, i, j); break;
-                    case INVERT: invert(current_permutation, i, j); break;
-                }
-                int tmp = countPath(current_permutation);
-
-                if (tmp <= min) {
-                    te.i = i; te.j = j;
-                    min = tmp;
-                    for (int k = 0; k < numberOfCities; k++) {
-                        result_permutation[k] = current_permutation[k]; //tu trafia najlepsza znaleziona permutacja z okolicy
-                    }
-                }
-                switch(currentNeighbourhood){
-                        case SWAP: swap(current_permutation, i, j); break;
-                        case INSERT: insert(current_permutation, j, i); break;
-                        case INVERT: invert(current_permutation, i, j); break;
-                }
-
-            }
-        }
-    }
-    return te;
-}
-
-bool TravellingSalesmanProblem::inTabuList(int i, int j) {
-    for (auto &it : tabuList) {
-        if ((it.i == i && it.j == j)||(it.i == j && it.j == i)) //przypadki, w ktorych nie zamieniamy
-            return true;
-    }
-    return false;
 }
 
 int TravellingSalesmanProblem::beginning(int *current_permutation) { //zwykly algorytm zachlanny szuka poczatkowego rozwiazania
@@ -329,12 +218,15 @@ void TravellingSalesmanProblem::menu() {
     std::cout << "MENU - Problem komiwojazera\n"
             "1. Wczytaj z pliku.\n"
             "2. Wprowadz kryterium stopu. Teraz: " << stopCriterium << " s.\n"
-            "3. Dywersyfikacja. Teraz: " << diversification << ". "
-            "(0 - wylaczona, 1 - wlaczona).\n"
-            "4. Wybor sasiedztwa. Teraz: " << currentNeighbourhood << ". "
-            "(0 - swap, 1 - insert, 2 - invert).\n"
-            "5. Tabu search.\n"
-            "6. Wyjdz.\n"
+            "3. Wielkosc populacji początkowej. Teraz: " << populationSize << ".\n"
+            "4. Wspolczynnik mutacji. Teraz: " << mutationRate << ".\n"
+            "5. Wspolczynnik krzyzowania. Teraz: " << crossoverRate << ".\n"
+            "6. Metoda krzyzowania. Teraz: " << crossoverMethod << ". "
+            "(0 - XX, 1 - YY)\n"
+            "7. Metoda mutacji. Teraz: " << mutationMethod << ". "
+            "(0 - AA, 1 - BB)\n"
+            "8. Uruchom algorytm genetyczny.\n"
+            "9. Wyjdz.\n"
             "Prosze wpisac odpowiednia liczbe.\n";
     int chosen;
     std::string file_name;
@@ -345,44 +237,62 @@ void TravellingSalesmanProblem::menu() {
             std::cin >> file_name;
             if (this->loadFromFile(file_name)){
                 std::cout << "Poprawnie wczytano.\n";
+                std::cout << citiesDistances;
             }
             else std::cout << "Nie udalo sie wczytac pliku.\n";
             break;
         case 2:
             std::cout << "Prosze podac kryterium stopu (w sekundach).\n";
-            //int v;
             std::cin >> stopCriterium;
-            //this->generateRandom(v);
             break;
         case 3:
-            std::cout << "Zmieniono ustawienia dywersyfikacji.\n";
-            //int v;
-            diversification = !diversification;
-            //this->generateRandom(v);
+            std::cout << "Prosze podac wielkoc populacji poczatkowej.\n";
+            std::cin >> populationSize;
             break;
         case 4:
-            std::cout << "Prosze wybrac sasiedztwo.\n"
-                    "0 - swap\n"
-                    "1 - insert\n"
-                    "2 - invert\n";
-            int neighbours;
-            std::cin >> neighbours;
-            switch(neighbours){
-                case 0:
-                    currentNeighbourhood = SWAP;
-                    break;
-                case 1:
-                    currentNeighbourhood = INSERT;
-                    break;
-                case 2:
-                    currentNeighbourhood = INVERT;
-                    break;
-            }
+            std::cout << "Prosze podac wielkoc wspolczynnik mutacji.\n";
+            std::cin >> mutationRate;
             break;
         case 5:
-            std::cout << "\n########################################\n" << this->tabuSearch();
+            std::cout << "Prosze podac wielkoc wspolczynnik krzyzowania.\n";
+            std::cin >> crossoverRate;
             break;
         case 6:
+            std::cout << "Prosze wybrac metode krzyzowania.\n"
+                    "0 - XX\n"
+                    "1 - YY\n";
+            int crossover;
+            std::cin >> crossover;
+            switch(crossover){
+                case 0:
+                    crossoverMethod = XX;
+                    break;
+                case 1:
+                    crossoverMethod = YY;
+                    break;
+                default:break;
+            }
+            break;
+        case 7:
+            std::cout << "Prosze wybrac metode mutacji.\n"
+                    "0 - AA\n"
+                    "1 - BB\n";
+            int mutation;
+            std::cin >> mutation;
+            switch(mutation){
+                case 0:
+                    mutationMethod = AA;
+                    break;
+                case 1:
+                    mutationMethod = BB;
+                    break;
+                default:break;
+            }
+            break;
+        case 8:
+            std::cout << "\n########################################\n" << this->geneticAlgorithm();
+            break;
+        case 9:
             return;
         default:
             std::cout  << "Prosze podac poprawna liczbe.\n";
@@ -422,19 +332,31 @@ TravellingSalesmanProblem::TravellingSalesmanProblem() {
 
 }
 
-void TravellingSalesmanProblem::setDiversification(bool diversification) {
-    TravellingSalesmanProblem::diversification = diversification;
-}
-
 void TravellingSalesmanProblem::setStopCriterium(double stopCriterium) {
     TravellingSalesmanProblem::stopCriterium = stopCriterium;
 }
 
-void TravellingSalesmanProblem::setCurrentNeighbourhood(TravellingSalesmanProblem::Neighbourhood currentNeighbourhood) {
-    TravellingSalesmanProblem::currentNeighbourhood = currentNeighbourhood;
-}
-
 void TravellingSalesmanProblem::setNumberOfIterations(int numberOfIterations) {
     TravellingSalesmanProblem::numberOfIterations = numberOfIterations;
+}
+
+void TravellingSalesmanProblem::setSizeOfPopulation(int sizeOfPopulation) {
+    TravellingSalesmanProblem::populationSize = sizeOfPopulation;
+}
+
+void TravellingSalesmanProblem::setMutationRate(double mutationRate) {
+    TravellingSalesmanProblem::mutationRate = mutationRate;
+}
+
+void TravellingSalesmanProblem::setCrossoverRate(double crossoverRate) {
+    TravellingSalesmanProblem::crossoverRate = crossoverRate;
+}
+
+void TravellingSalesmanProblem::setCrossoverMethod(TravellingSalesmanProblem::CrosoverMethod crossoverMethod) {
+    TravellingSalesmanProblem::crossoverMethod = crossoverMethod;
+}
+
+void TravellingSalesmanProblem::setMutationMethod(TravellingSalesmanProblem::MutationMethod mutationMethod) {
+    TravellingSalesmanProblem::mutationMethod = mutationMethod;
 }
 

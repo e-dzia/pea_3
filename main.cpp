@@ -2,6 +2,7 @@
 #include <ctime>
 #include <thread>
 #include "TravellingSalesmanProblem.h"
+#include "Path.h"
 
 void test();
 
