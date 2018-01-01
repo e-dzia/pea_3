@@ -10,12 +10,18 @@ GraphMatrix::GraphMatrix() {
 }
 
 GraphMatrix::~GraphMatrix() {
-    //std::cout << *this;
     if (matrix != nullptr){
         for (int i = 0; i < vertexes; i++){
-            if (matrix[i] != nullptr) delete[] matrix[i];
+            if (matrix[i] != nullptr) {
+                delete[] matrix[i];
+                matrix[i] = nullptr;
+            }
         }
         delete[] matrix;
+        matrix = nullptr;
+        density = 0;
+        edges = 0;
+        vertexes = 0;
     }
 }
 
@@ -43,6 +49,7 @@ void GraphMatrix::loadFromFile(std::string filename) {
 }
 
 void GraphMatrix::print(std::ostream &str) const {
+    if (matrix == nullptr) return;
     str.flags ( std::ios::right);
     str.width (4);
     str << "    ";
@@ -55,6 +62,7 @@ void GraphMatrix::print(std::ostream &str) const {
         str.width (4);
         str << i << "  ";
         for (int j = 0; j < vertexes; j++){
+            if (matrix[i] == nullptr) return;
             str.width (4);
             str << matrix[i][j] << " ";
         }
@@ -71,13 +79,13 @@ void GraphMatrix::createMatrix(int v) {
     }
 
     this->vertexes = v;
-    matrix = new int *[v];
-    for (int i = 0; i < v; i++){
-        matrix[i] = new int[v];
+    matrix = new int *[this->vertexes];
+    for (int i = 0; i < this->vertexes; i++){
+        matrix[i] = new int[this->vertexes];
     }
 
-    for (int i = 0; i < v; i++){
-        for (int j = 0; j < v; j++){
+    for (int i = 0; i < this->vertexes; i++){
+        for (int j = 0; j < this->vertexes; j++){
             matrix[i][j] = -1;
         }
     }
@@ -136,18 +144,19 @@ void GraphMatrix::setEdge(int start, int end, int length) {
     matrix[start][end] = length;
 }
 
-int GraphMatrix::getEdgeLength(int start, int end) {
+int GraphMatrix::getEdgeLength(int start, int end) const {
     return matrix[start][end];
 }
 
-GraphMatrix& GraphMatrix::operator=(GraphMatrix graphMatrix) {
-    this->createMatrix(graphMatrix.vertexes);
+GraphMatrix& GraphMatrix::operator=(GraphMatrix const& graphMatrix) {
     this->vertexes = graphMatrix.vertexes;
     this->edges = graphMatrix.edges;
     this->density = graphMatrix.density;
-    for (int i = 0; i < graphMatrix.vertexes; i++){
-        for (int j = 0; j < graphMatrix.vertexes; j++){
-            this->matrix[i][j] = graphMatrix.matrix[i][j];
+    this->createMatrix(this->vertexes);
+
+    for (int i = 0; i < this->vertexes; i++){
+        for (int j = 0; j < this->vertexes; j++){
+            this->matrix[i][j] = graphMatrix.getEdgeLength(i,j);
         }
     }
     return *this;

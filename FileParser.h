@@ -38,7 +38,7 @@ public:
 
     bool parse(const std::string &filename);
 
-    const GraphMatrix getGraphMatrix();
+    const GraphMatrix& getGraphMatrix();
     int getNumberOfCities() const;
 
     const std::string &getFilename() const;

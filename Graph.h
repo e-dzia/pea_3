@@ -28,7 +28,7 @@ public:
     virtual void print(std::ostream& str)const = 0;
     virtual void makeBothWaysEqual() = 0;
     virtual void setEdge(int start, int end, int length) = 0;
-    virtual int getEdgeLength(int start, int end) = 0;
+    virtual int getEdgeLength(int start, int end) const = 0;
 
     friend std::ostream& operator<<(std::ostream& str, Graph const& g){
         g.print(str);

@@ -25,9 +25,9 @@ public:
 
     void setEdge(int start, int end, int length) override;
 
-    int getEdgeLength(int start, int end) override;
+    int getEdgeLength(int start, int end) const override;
 
-    GraphMatrix& operator=(GraphMatrix graphMatrix);
+    GraphMatrix& operator=(GraphMatrix const& graphMatrix);
 
 };
 

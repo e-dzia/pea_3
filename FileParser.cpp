@@ -166,7 +166,7 @@ bool FileParser::upperDiagRow() {
     return true;
 }
 
-const GraphMatrix FileParser::getGraphMatrix(){
+const GraphMatrix& FileParser::getGraphMatrix(){
     return graphMatrix;
 }
 

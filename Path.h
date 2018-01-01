@@ -9,17 +9,18 @@
 
 class Path {
 private:
-    static GraphMatrix citiesDistances;
-    static int numberOfCities;
-
     int *permutation;
     int length;
+    int start = 0;
 
     int operator[](int i) const;
 public:
-
     Path();
+    Path(const Path& p);
     virtual ~Path();
+
+    static GraphMatrix citiesDistances;
+    static int numberOfCities;
 
     bool isShorter(Path p);
 
@@ -29,19 +30,21 @@ public:
 
     void countPath();
 
-    void setPath(const int path[numberOfCities]);
-    void setPath(Path p);
+    void setPath(const int *path);
+    void setPath(const Path& p);
     void setRandom();
-    static void setCitiesDistances(const GraphMatrix &citiesDistances);
+    static void setCitiesDistances(GraphMatrix& citiesDistances);
     int getLength() const;
 
-    Path& operator=(Path p);
+    Path& operator=(Path const& p);
     void print(std::ostream &str) const;
 
     friend std::ostream& operator<<(std::ostream& str, Path const& p){
         p.print(str);
         return str;
     }
+
+    void initialize();
 };
 
 

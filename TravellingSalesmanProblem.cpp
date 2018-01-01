@@ -9,13 +9,15 @@ std::string TravellingSalesmanProblem::geneticAlgorithm() {
     Timer t;
     t.start();
 
-    bestInPopulation.setCitiesDistances(citiesDistances);
-
     for(int i = 0; i < populationSize; i++){
         Path path;
         path.setRandom();
+        std::cout << path << "\n";
         population.push_back(path);
     }
+
+    bestInPopulation = population[0];
+    bestInPopulation.setRandom();
 
     int nOI = 0;
     while (/*t.getWithoutStopping() < stopCriterium && */ nOI++ < numberOfIterations){
@@ -27,15 +29,10 @@ std::string TravellingSalesmanProblem::geneticAlgorithm() {
     }
 
     std::stringstream ss;
-    ss << "Algorytm tabu search.\nWynik " << std::endl;
-    for (int i = 0; i < numberOfCities; i++){
-        ss << bestInPopulation;
-    }
-    ss << ": " << length << std::endl;
+    ss << "Algorytm genetyczny.\nWynik " << std::endl;
+    ss << bestInPopulation;
+    ss << ": " << bestInPopulation.getLength() << std::endl;
 
-    delete[] current_permutation;
-    delete[] result_permutation;
-    tabuList.clear();
     return ss.str();
 }
 
@@ -201,9 +198,9 @@ bool TravellingSalesmanProblem::loadFromFile(std::string filename) {
     FileParser fileParser;
     if (fileParser.parse(filename)){
         citiesDistances = fileParser.getGraphMatrix();
-        //std::cout << citiesDistances;
         numberOfCities = fileParser.getNumberOfCities();
-        return true;
+        Path::setCitiesDistances(citiesDistances);
+       return true;
     }
     else return false;
 }
@@ -218,7 +215,7 @@ void TravellingSalesmanProblem::menu() {
     std::cout << "MENU - Problem komiwojazera\n"
             "1. Wczytaj z pliku.\n"
             "2. Wprowadz kryterium stopu. Teraz: " << stopCriterium << " s.\n"
-            "3. Wielkosc populacji początkowej. Teraz: " << populationSize << ".\n"
+            "3. Wielkosc populacji poczatkowej. Teraz: " << populationSize << ".\n"
             "4. Wspolczynnik mutacji. Teraz: " << mutationRate << ".\n"
             "5. Wspolczynnik krzyzowania. Teraz: " << crossoverRate << ".\n"
             "6. Metoda krzyzowania. Teraz: " << crossoverMethod << ". "
@@ -318,7 +315,7 @@ double TravellingSalesmanProblem::testTime(int algorithmType) {
     switch (algorithmType){
         case 1:
             timer->start();
-            this->tabuSearch();
+            this->geneticAlgorithm();
             timer->stop();
             break;
     }
@@ -329,7 +326,6 @@ double TravellingSalesmanProblem::testTime(int algorithmType) {
 }
 
 TravellingSalesmanProblem::TravellingSalesmanProblem() {
-
 }
 
 void TravellingSalesmanProblem::setStopCriterium(double stopCriterium) {

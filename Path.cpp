@@ -4,6 +4,9 @@
 
 #include "Path.h"
 
+int Path::numberOfCities = 0;
+GraphMatrix Path::citiesDistances;
+
 void Path::swap(int left, int right) {
     if (right == left) return;
     int tmp = permutation[left];
@@ -48,7 +51,7 @@ void Path::countPath() {
     length += citiesDistances.getEdgeLength(permutation[end],permutation[0]);
 }
 
-void Path::setPath(const int path[numberOfCities]) {
+void Path::setPath(const int *path) {
     for (int i = 0; i < numberOfCities; i++){
         permutation[i] = path[i];
     }
@@ -59,7 +62,7 @@ Path::~Path() {
     delete[] permutation;
 }
 
-void Path::setPath(const Path p) {
+void Path::setPath(const Path& p) {
     for (int i = 0; i < numberOfCities; i++){
         permutation[i] = p[i];
     }
@@ -70,7 +73,8 @@ int Path::operator[](int i) const {
     return permutation[i];
 }
 
-Path &Path::operator=(Path p) {
+Path &Path::operator=(Path const& p) {
+    if (permutation == nullptr) initialize();
     this->setPath(p);
     return *this;
 }
@@ -80,8 +84,8 @@ void Path::setRandom() {
     for (int i = 0; i < numberOfCities; i++){
         visited[i] = false;
     }
-    visited[0] = true;
-    permutation[0] = 0;
+    visited[start] = true;
+    permutation[0] = start;
     for (int i = 1; i < numberOfCities; i++){
         do{
             permutation[i] = rand()%numberOfCities;
@@ -100,9 +104,9 @@ int Path::getLength() const {
     return length;
 }
 
-void Path::setCitiesDistances(const GraphMatrix &citiesDistances) {
+void Path::setCitiesDistances(GraphMatrix& citiesDistances) {
     Path::citiesDistances = citiesDistances;
-    numberOfCities = citiesDistances.getNumberOfVertexes();
+    Path::numberOfCities = citiesDistances.getNumberOfVertexes();
 }
 
 void Path::print(std::ostream &str) const {
@@ -112,5 +116,23 @@ void Path::print(std::ostream &str) const {
     str << "\n";
 }
 
-Path::Path() = default;
+Path::Path(){
+    permutation = nullptr;
+    if (numberOfCities > 0) permutation = new int[numberOfCities];
+    length = 0;
+}
+
+Path::Path(const Path &p) {
+    if (permutation == nullptr) initialize();
+    permutation = nullptr;
+    if (numberOfCities > 0) permutation = new int[numberOfCities];
+    length = 0;
+    this->setPath(p);
+}
+
+void Path::initialize() {
+    permutation = nullptr;
+    if (numberOfCities > 0) permutation = new int[numberOfCities];
+    length = 0;
+}
 

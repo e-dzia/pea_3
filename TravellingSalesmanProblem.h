@@ -20,8 +20,6 @@ public:
         AA, BB
     };
 
-
-
 private:
     GraphMatrix citiesDistances;
     int numberOfCities;
@@ -30,8 +28,8 @@ private:
     int populationSize = 10;
     double mutationRate = 0.01;
     double crossoverRate = 0.8;
-    CrosoverMethod crossoverMethod;
-    MutationMethod mutationMethod;
+    CrosoverMethod crossoverMethod = XX;
+    MutationMethod mutationMethod = AA;
 
     int numberOfIterations = 20; //for debugging
     int start = 0;
@@ -43,8 +41,8 @@ private:
     void permute(int *permutation, int left, int right, int &min, int *result);
     int countPath(int *permutation);
 
-    Path bestInPopulation;
     std::vector<Path> population;
+    Path bestInPopulation;
 
 public:
 
