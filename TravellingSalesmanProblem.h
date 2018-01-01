@@ -17,7 +17,7 @@ public:
     };
 
     enum MutationMethod{
-        AA, BB
+        INSERT, INVERT
     };
 
 private:
@@ -29,17 +29,12 @@ private:
     double mutationRate = 0.01;
     double crossoverRate = 0.8;
     CrosoverMethod crossoverMethod = XX;
-    MutationMethod mutationMethod = AA;
+    MutationMethod mutationMethod = INVERT;
 
-    int numberOfIterations = 20; //for debugging
+    int numberOfIterations = 100; //for debugging
     int start = 0;
 
-    void swap(int *permutation, int left, int right);
-    void insert(int *permutation, int left, int right);
-    void invert(int *permutation, int left, int right);
-
     void permute(int *permutation, int left, int right, int &min, int *result);
-    int countPath(int *permutation);
 
     std::vector<Path> population;
     Path bestInPopulation;
@@ -48,7 +43,6 @@ public:
 
     TravellingSalesmanProblem();
 
-public:
     void setSizeOfPopulation(int sizeOfPopulation);
     void setMutationRate(double mutationRate);
     void setCrossoverRate(double crossoverRate);
@@ -71,6 +65,13 @@ public:
     void restart(int *current_permutation);
     void restart_random(int *permutation);
     int beginning(int *current_permutation);
+
+    void chooseMatingPool();
+    void crossover();
+    void mutation();
+    void newPopulation();
+
+    void checkBest();
 };
 
 

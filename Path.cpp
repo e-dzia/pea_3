@@ -8,14 +8,14 @@ int Path::numberOfCities = 0;
 GraphMatrix Path::citiesDistances;
 
 void Path::swap(int left, int right) {
-    if (right == left) return;
+    if (right == left || right == 0 || left == 0) return;
     int tmp = permutation[left];
     permutation[left] = permutation[right];
     permutation[right] = tmp;
 }
 
 void Path::insert(int left, int right) {
-    if (right == left) return;
+    if (right == left || right == 0 || left == 0) return;
     if (right < left){
         int tmp = permutation[left];
         for (int i = left; i > right; i--){
@@ -30,11 +30,10 @@ void Path::insert(int left, int right) {
         }
         permutation[right] = tmp;
     }
-
 }
 
 void Path::invert(int left, int right) {
-    if (right == left) return;
+    if (right == left || right == 0 || left == 0) return;
     if (right < left){int tmp = left; left = right; right = tmp;}
     for (int i = 0; i < (right - left +1)/2; i++){
         swap(left+i,right-i);
@@ -117,22 +116,16 @@ void Path::print(std::ostream &str) const {
 }
 
 Path::Path(){
-    permutation = nullptr;
-    if (numberOfCities > 0) permutation = new int[numberOfCities];
-    length = 0;
+    initialize();
 }
 
 Path::Path(const Path &p) {
-    if (permutation == nullptr) initialize();
-    permutation = nullptr;
-    if (numberOfCities > 0) permutation = new int[numberOfCities];
-    length = 0;
+    initialize();
     this->setPath(p);
 }
 
 void Path::initialize() {
     permutation = nullptr;
     if (numberOfCities > 0) permutation = new int[numberOfCities];
-    length = 0;
 }
 

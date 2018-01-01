@@ -10,7 +10,7 @@
 class Path {
 private:
     int *permutation;
-    int length;
+    int length = INT32_MAX;
     int start = 0;
 
     int operator[](int i) const;

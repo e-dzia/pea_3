@@ -12,20 +12,22 @@ std::string TravellingSalesmanProblem::geneticAlgorithm() {
     for(int i = 0; i < populationSize; i++){
         Path path;
         path.setRandom();
-        std::cout << path << "\n";
         population.push_back(path);
+        if (path.getLength() < bestInPopulation.getLength()){
+            bestInPopulation = path;
+        }
     }
 
-    bestInPopulation = population[0];
-    bestInPopulation.setRandom();
+    std::cout << bestInPopulation << " " << bestInPopulation.getLength() << "\n";
+
 
     int nOI = 0;
     while (/*t.getWithoutStopping() < stopCriterium && */ nOI++ < numberOfIterations){
-        /*chooseMatingPool();
-        pairMatingPool();
+        chooseMatingPool();
         crossover();
         mutation();
-        newPopulation();*/
+        newPopulation();
+        checkBest();
     }
 
     std::stringstream ss;
@@ -35,6 +37,48 @@ std::string TravellingSalesmanProblem::geneticAlgorithm() {
 
     return ss.str();
 }
+
+void TravellingSalesmanProblem::chooseMatingPool() {
+
+}
+
+void TravellingSalesmanProblem::crossover() {
+
+}
+
+void TravellingSalesmanProblem::mutation() {
+    for (Path p: population){
+        int tmp = rand()%100;
+        if (tmp <= mutationRate*100){
+            switch(mutationMethod){
+                case INSERT:
+                    std::cout << p;
+                    p.insert(rand()%numberOfCities,rand()%numberOfCities);
+                    std::cout << p << "MUTACJA_END\n";
+                    break;
+                case INVERT:
+                    std::cout << p;
+                    p.invert(rand()%numberOfCities,rand()%numberOfCities);
+                    std::cout << p << "MUTACJA_END\n";
+                    break;
+            }
+        }
+    }
+}
+
+void TravellingSalesmanProblem::newPopulation() {
+
+}
+
+
+void TravellingSalesmanProblem::checkBest() {
+    for (const Path &p: population){
+        if (p.getLength() < bestInPopulation.getLength()){
+            bestInPopulation = p;
+        }
+    }
+}
+
 
 void TravellingSalesmanProblem::restart_random(int *current_permutation) { //restart calkowicie losowy - nieuzywana funkcja, okazala sie niezbyt skuteczna
     bool* visited = new bool[numberOfCities];
@@ -221,7 +265,7 @@ void TravellingSalesmanProblem::menu() {
             "6. Metoda krzyzowania. Teraz: " << crossoverMethod << ". "
             "(0 - XX, 1 - YY)\n"
             "7. Metoda mutacji. Teraz: " << mutationMethod << ". "
-            "(0 - AA, 1 - BB)\n"
+            "(0 - INSERT, 1 - INVERT)\n"
             "8. Uruchom algorytm genetyczny.\n"
             "9. Wyjdz.\n"
             "Prosze wpisac odpowiednia liczbe.\n";
@@ -272,16 +316,16 @@ void TravellingSalesmanProblem::menu() {
             break;
         case 7:
             std::cout << "Prosze wybrac metode mutacji.\n"
-                    "0 - AA\n"
-                    "1 - BB\n";
+                    "0 - INSERT\n"
+                    "1 - INVERT\n";
             int mutation;
             std::cin >> mutation;
             switch(mutation){
                 case 0:
-                    mutationMethod = AA;
+                    mutationMethod = INSERT;
                     break;
                 case 1:
-                    mutationMethod = BB;
+                    mutationMethod = INVERT;
                     break;
                 default:break;
             }
@@ -355,4 +399,3 @@ void TravellingSalesmanProblem::setCrossoverMethod(TravellingSalesmanProblem::Cr
 void TravellingSalesmanProblem::setMutationMethod(TravellingSalesmanProblem::MutationMethod mutationMethod) {
     TravellingSalesmanProblem::mutationMethod = mutationMethod;
 }
-
