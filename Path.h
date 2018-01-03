@@ -11,7 +11,6 @@ class Path {
 private:
     int *permutation;
     int length = INT32_MAX;
-    int start = 0;
 
     int operator[](int i) const;
 public:
@@ -24,7 +23,11 @@ public:
 
     bool isShorter(const Path& p)const;
     bool operator<(const Path& p) const;
+    bool operator<=(const Path& p) const;
+    bool operator>(const Path& p) const;
+    bool operator>=(const Path& p) const;
     bool operator==(const Path& p) const;
+    bool operator!=(const Path& p) const;
 
     void swap(int left, int right);
     void insert(int left, int right);
@@ -32,6 +35,9 @@ public:
 
     Path crossoverPMXfirstChild(const Path &p, int left, int right) const;
     Path crossoverPMXsecondChild(const Path &p, int left, int right) const;
+
+    Path crossoverOXfirstChild(const Path &p, int left, int right) const;
+    Path crossoverOXsecondChild(const Path &p, int left, int right) const;
 
     void countPath();
 

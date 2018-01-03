@@ -8,14 +8,14 @@ int Path::numberOfCities = 0;
 GraphMatrix Path::citiesDistances;
 
 void Path::swap(int left, int right) {
-    if (right == left || right == start || left == start) return;
+    if (right == left) return;
     int tmp = permutation[left];
     permutation[left] = permutation[right];
     permutation[right] = tmp;
 }
 
 void Path::insert(int left, int right) {
-    if (right == left || right == start || left == start) return;
+    if (right == left) return;
     if (right < left){
         int tmp = permutation[left];
         for (int i = left; i > right; i--){
@@ -33,7 +33,7 @@ void Path::insert(int left, int right) {
 }
 
 void Path::invert(int left, int right) {
-    if (right == left || right == start || left == start) return;
+    if (right == left) return;
     if (right < left){int tmp = left; left = right; right = tmp;}
     for (int i = 0; i < (right - left +1)/2; i++){
         swap(left+i,right-i);
@@ -83,8 +83,8 @@ void Path::setRandom() {
     for (int i = 0; i < numberOfCities; i++){
         visited[i] = false;
     }
-    visited[start] = true;
-    permutation[0] = start;
+    visited[0] = true;
+    permutation[0] = 0;
     for (int i = 1; i < numberOfCities; i++){
         do{
             permutation[i] = rand()%numberOfCities;
@@ -134,6 +134,7 @@ void Path::initialize() {
 }
 
 bool Path::operator==(const Path &p) const {
+    if(this->length != p.getLength()) return false;
     for (int i = 0; i < numberOfCities; i++){
         if (permutation[i] != p[i]) return false;
     }
@@ -141,11 +142,12 @@ bool Path::operator==(const Path &p) const {
 }
 
 Path Path::crossoverPMXfirstChild(const Path &p, int left, int right) const{
-    if (left == right || left == start || right == start) return *this;
+    if (left == right) return Path(*this);
     if (left > right) {
         int tmp = right;
         right = left;
         left = tmp;
+
     }
     Path toReturn = *this;
     int length = right - left + 1;
@@ -158,12 +160,23 @@ Path Path::crossoverPMXfirstChild(const Path &p, int left, int right) const{
         toReturn.permutation[i] = p.permutation[i];
     }
 
+    for (int i = 0; i < length; i++){
+        for (int j = 0; j < length; j++){
+            if (toChange[i] == notUsed[j]){
+                toChange[i] = -1;
+                notUsed[j] = -1;
+                j = length;
+            }
+        }
+    }
+
     int k = 0;
     for (int i = 0; i < numberOfCities; i++){
         if (i == left) i += length;
         if (i == right) i++;
         for (int j = 0; j < length; j++){
             if (toReturn.permutation[i] == toChange[j]){
+                while (notUsed[k] == -1) k++;
                 toReturn.permutation[i] = notUsed[k++];
                 j = length;
             }
@@ -174,6 +187,77 @@ Path Path::crossoverPMXfirstChild(const Path &p, int left, int right) const{
 
 Path Path::crossoverPMXsecondChild(const Path &p, int left, int right) const {
     return p.crossoverPMXfirstChild(*this, left, right);
+}
+
+Path Path::crossoverOXfirstChild(const Path &p, int left, int right) const {
+    if (left == right) return Path(*this);
+    if (left > right) {
+        int tmp = right;
+        right = left;
+        left = tmp;
+    }
+    Path toReturn;
+    int length = right - left + 1;
+    int toChange[length];
+    int notUsed[numberOfCities-1];
+    for (int i = left, j = 0; i <= right; i++, j++){
+        toChange[j] = p.permutation[i];
+        toReturn.permutation[i] = p.permutation[i];
+    }
+    int k = 0;
+    for (int i = right+1; i < numberOfCities; i++){
+        notUsed[k++] = this->permutation[i];
+    }
+    for(int i = 0; i <= right; i++){
+        notUsed[k++] = this->permutation[i];
+    }
+
+    k = 0;
+    for (int i = right+1; i < numberOfCities;){
+        bool insert = true;
+        for (int j = 0; j < length; j++){
+            if (notUsed[k] == toChange[j]){
+                insert = false;
+            }
+        }
+        if (insert){
+            toReturn.permutation[i++] = notUsed[k++];
+        }
+        else k++;
+    }
+    for(int i = 0; i < left; ){
+        bool insert = true;
+        for (int j = 0; j < length; j++){
+            if (notUsed[k] == toChange[j]){
+                insert = false;
+            }
+        }
+        if (insert){
+            toReturn.permutation[i++] = notUsed[k++];
+        }
+        else k++;
+    }
+    return toReturn;
+}
+
+Path Path::crossoverOXsecondChild(const Path &p, int left, int right) const {
+    return p.crossoverOXfirstChild(*this,left,right);
+}
+
+bool Path::operator!=(const Path &p) const {
+    return !operator==(p);
+}
+
+bool Path::operator>=(const Path &p) const {
+    return !operator<(p);
+}
+
+bool Path::operator<=(const Path &p) const {
+    return operator<(p) || operator==(p);
+}
+
+bool Path::operator>(const Path &p) const {
+    return !operator<=(p);
 }
 
 

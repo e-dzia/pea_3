@@ -6,12 +6,14 @@
 #include <cmath>
 #include <algorithm>
 #include <cstdlib>
+#include <set>
+
 
 std::string TravellingSalesmanProblem::geneticAlgorithm() {
     Timer t;
     t.start();
 
-    for(int i = 0; i < 2; i++){
+    for(int i = 0; i < populationSize; i++){
         Path path;
         path.setRandom();
         population.push_back(path);
@@ -20,21 +22,32 @@ std::string TravellingSalesmanProblem::geneticAlgorithm() {
         }
     }
 
+//printPopulation();
+
     int nOI = 0;
     while (/*t.getWithoutStopping() < stopCriterium && */ nOI++ < numberOfIterations){
+
         chooseMatingPool();
-        crossover();
+//        std::cout << "MatingPool\n"; printPopulation();
+
         mutation();
+  //      std::cout << "Mutation\n";printPopulation();
+
         newPopulation();
+        //std::cout << "NewPop\n"; printPopulation();
+
         checkBest();
     }
 
-    printPopulation();
-    Path path = population[0].crossoverPMXfirstChild(population[1], 3, 5);
-    population.push_back(path);
-    path = population[0].crossoverPMXsecondChild(population[1], 3, 5);
-    population.push_back(path);
-    printPopulation();
+
+/*printPopulation();
+int left = 2; int right = 1;
+    Path child = population[0].crossoverPMXfirstChild(population[1], left, right);
+    population.push_back(child);
+    child = population[0].crossoverPMXsecondChild(population[1], left, right);
+    population.push_back(child);*/
+
+//printPopulation();
 
     std::stringstream ss;
     ss << "Algorytm genetyczny.\nWynik " << std::endl;
@@ -45,18 +58,38 @@ std::string TravellingSalesmanProblem::geneticAlgorithm() {
 }
 
 void TravellingSalesmanProblem::chooseMatingPool() {
+    matingPool.clear();
+    int matingPoolSize = populationSize/2;
+    for (int i = 0; i < matingPoolSize; i++){
+        Path mother = selectRandomParent();
+        Path father = selectRandomParent();
+        if (mother == father);
+        else {
+            crossover(mother, father);
+        }
+    }
+
 
 }
 
-void TravellingSalesmanProblem::crossover() {
-    switch(crossoverMethod){
-        case PMX:
-            //TODO: zamienić jak będzie mating pool
-            Path path = population[0].crossoverPMXfirstChild(population[1], 3, 5);
-            population.push_back(path);
-            path = population[0].crossoverPMXsecondChild(population[1], 3, 5);
-            population.push_back(path);
-            break;
+void TravellingSalesmanProblem::crossover(const Path &mother, const Path &father) {
+    int tmp = rand()%100;
+    if (tmp <= crossoverRate*100) {
+        Path child;
+        switch (crossoverMethod) {
+            case PMX:
+                child = mother.crossoverPMXfirstChild(father, rand()%numberOfCities, rand()%numberOfCities);
+                population.push_back(child);
+                child = mother.crossoverPMXsecondChild(father, rand()%numberOfCities, rand()%numberOfCities);
+                population.push_back(child);
+                break;
+            case OX:
+                child = mother.crossoverOXfirstChild(father, rand()%numberOfCities, rand()%numberOfCities);
+                population.push_back(child);
+                child = mother.crossoverOXsecondChild(father, rand()%numberOfCities, rand()%numberOfCities);
+                population.push_back(child);
+                break;
+        }
     }
 }
 
@@ -99,7 +132,10 @@ void TravellingSalesmanProblem::sortPopulation() {
 }
 
 void TravellingSalesmanProblem::deleteDuplicates() {
-    population.erase( unique( population.begin(), population.end() ), population.end() );
+    std::set<Path> s;
+    for (Path i : population)
+        s.insert(i);
+    population.assign( s.begin(), s.end() );
 }
 
 void TravellingSalesmanProblem::deleteWorst() {
@@ -244,7 +280,7 @@ void TravellingSalesmanProblem::menu() {
             "4. Wspolczynnik mutacji. Teraz: " << mutationRate << ".\n"
             "5. Wspolczynnik krzyzowania. Teraz: " << crossoverRate << ".\n"
             "6. Metoda krzyzowania. Teraz: " << crossoverMethod << ". "
-            "(0 - PMX, 1 - YY)\n"
+            "(0 - PMX, 1 - OX)\n"
             "7. Metoda mutacji. Teraz: " << mutationMethod << ". "
             "(0 - INSERT, 1 - INVERT)\n"
             "8. Uruchom algorytm genetyczny.\n"
@@ -282,7 +318,7 @@ void TravellingSalesmanProblem::menu() {
         case 6:
             std::cout << "Prosze wybrac metode krzyzowania.\n"
                     "0 - PMX\n"
-                    "1 - YY\n";
+                    "1 - OX\n";
             int crossover;
             std::cin >> crossover;
             switch(crossover){
@@ -290,7 +326,7 @@ void TravellingSalesmanProblem::menu() {
                     crossoverMethod = PMX;
                     break;
                 case 1:
-                    crossoverMethod = YY;
+                    crossoverMethod = OX;
                     break;
                 default:break;
             }
@@ -385,5 +421,20 @@ void TravellingSalesmanProblem::printPopulation() {
     for (Path p: population){
         std::cout << p.getLength() << " ##### " << p;
     }
-    std::cout << "#########################";
+    std::cout << "#########################\n";
+}
+
+Path TravellingSalesmanProblem::selectRandomParent() {
+    int sum = 0;
+    for (const Path &p: population){
+        sum += p.getLength();
+    }
+    int tmp = rand()%sum;
+    int search = 0;
+    int previous = search;
+    for (const Path &p: population){
+        search += p.getLength();
+        if (tmp < search && tmp >= previous) return p;
+        previous = search;
+    }
 }
