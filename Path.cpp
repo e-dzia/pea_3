@@ -8,14 +8,14 @@ int Path::numberOfCities = 0;
 GraphMatrix Path::citiesDistances;
 
 void Path::swap(int left, int right) {
-    if (right == left || right == 0 || left == 0) return;
+    if (right == left || right == start || left == start) return;
     int tmp = permutation[left];
     permutation[left] = permutation[right];
     permutation[right] = tmp;
 }
 
 void Path::insert(int left, int right) {
-    if (right == left || right == 0 || left == 0) return;
+    if (right == left || right == start || left == start) return;
     if (right < left){
         int tmp = permutation[left];
         for (int i = left; i > right; i--){
@@ -33,7 +33,7 @@ void Path::insert(int left, int right) {
 }
 
 void Path::invert(int left, int right) {
-    if (right == left || right == 0 || left == 0) return;
+    if (right == left || right == start || left == start) return;
     if (right < left){int tmp = left; left = right; right = tmp;}
     for (int i = 0; i < (right - left +1)/2; i++){
         swap(left+i,right-i);
@@ -139,4 +139,42 @@ bool Path::operator==(const Path &p) const {
     }
     return true;
 }
+
+Path Path::crossoverPMXfirstChild(const Path &p, int left, int right) const{
+    if (left == right || left == start || right == start) return *this;
+    if (left > right) {
+        int tmp = right;
+        right = left;
+        left = tmp;
+    }
+    Path toReturn = *this;
+    int length = right - left + 1;
+    int toChange[length];
+    int notUsed[length];
+
+    for (int i = left, j = 0; i <= right; i++, j++){
+        toChange[j] = p.permutation[i];
+        notUsed[j] = toReturn.permutation[i];
+        toReturn.permutation[i] = p.permutation[i];
+    }
+
+    int k = 0;
+    for (int i = 0; i < numberOfCities; i++){
+        if (i == left) i += length;
+        if (i == right) i++;
+        for (int j = 0; j < length; j++){
+            if (toReturn.permutation[i] == toChange[j]){
+                toReturn.permutation[i] = notUsed[k++];
+                j = length;
+            }
+        }
+    }
+    return toReturn;
+}
+
+Path Path::crossoverPMXsecondChild(const Path &p, int left, int right) const {
+    return p.crossoverPMXfirstChild(*this, left, right);
+}
+
+
 

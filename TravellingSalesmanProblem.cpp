@@ -11,7 +11,7 @@ std::string TravellingSalesmanProblem::geneticAlgorithm() {
     Timer t;
     t.start();
 
-    for(int i = 0; i < populationSize+5; i++){
+    for(int i = 0; i < 2; i++){
         Path path;
         path.setRandom();
         population.push_back(path);
@@ -29,6 +29,13 @@ std::string TravellingSalesmanProblem::geneticAlgorithm() {
         checkBest();
     }
 
+    printPopulation();
+    Path path = population[0].crossoverPMXfirstChild(population[1], 3, 5);
+    population.push_back(path);
+    path = population[0].crossoverPMXsecondChild(population[1], 3, 5);
+    population.push_back(path);
+    printPopulation();
+
     std::stringstream ss;
     ss << "Algorytm genetyczny.\nWynik " << std::endl;
     ss << bestInPopulation;
@@ -42,7 +49,15 @@ void TravellingSalesmanProblem::chooseMatingPool() {
 }
 
 void TravellingSalesmanProblem::crossover() {
-
+    switch(crossoverMethod){
+        case PMX:
+            //TODO: zamienić jak będzie mating pool
+            Path path = population[0].crossoverPMXfirstChild(population[1], 3, 5);
+            population.push_back(path);
+            path = population[0].crossoverPMXsecondChild(population[1], 3, 5);
+            population.push_back(path);
+            break;
+    }
 }
 
 void TravellingSalesmanProblem::mutation() {
@@ -229,7 +244,7 @@ void TravellingSalesmanProblem::menu() {
             "4. Wspolczynnik mutacji. Teraz: " << mutationRate << ".\n"
             "5. Wspolczynnik krzyzowania. Teraz: " << crossoverRate << ".\n"
             "6. Metoda krzyzowania. Teraz: " << crossoverMethod << ". "
-            "(0 - XX, 1 - YY)\n"
+            "(0 - PMX, 1 - YY)\n"
             "7. Metoda mutacji. Teraz: " << mutationMethod << ". "
             "(0 - INSERT, 1 - INVERT)\n"
             "8. Uruchom algorytm genetyczny.\n"
@@ -266,13 +281,13 @@ void TravellingSalesmanProblem::menu() {
             break;
         case 6:
             std::cout << "Prosze wybrac metode krzyzowania.\n"
-                    "0 - XX\n"
+                    "0 - PMX\n"
                     "1 - YY\n";
             int crossover;
             std::cin >> crossover;
             switch(crossover){
                 case 0:
-                    crossoverMethod = XX;
+                    crossoverMethod = PMX;
                     break;
                 case 1:
                     crossoverMethod = YY;
@@ -370,4 +385,5 @@ void TravellingSalesmanProblem::printPopulation() {
     for (Path p: population){
         std::cout << p.getLength() << " ##### " << p;
     }
+    std::cout << "#########################";
 }

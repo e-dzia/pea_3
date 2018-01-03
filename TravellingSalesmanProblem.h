@@ -13,7 +13,7 @@ class TravellingSalesmanProblem{
 public:
 
     enum CrosoverMethod{
-        XX, YY
+        PMX, YY
     };
 
     enum MutationMethod{
@@ -28,7 +28,7 @@ private:
     int populationSize = 10;
     double mutationRate = 0.01;
     double crossoverRate = 0.8;
-    CrosoverMethod crossoverMethod = XX;
+    CrosoverMethod crossoverMethod = PMX;
     MutationMethod mutationMethod = INVERT;
 
     int numberOfIterations = 1; //for debugging

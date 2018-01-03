@@ -30,6 +30,9 @@ public:
     void insert(int left, int right);
     void invert(int left, int right);
 
+    Path crossoverPMXfirstChild(const Path &p, int left, int right) const;
+    Path crossoverPMXsecondChild(const Path &p, int left, int right) const;
+
     void countPath();
 
     void setPath(const int *path);

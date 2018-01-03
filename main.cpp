@@ -13,7 +13,7 @@ int main() {
     //test();
 
     TravellingSalesmanProblem * tsp = new TravellingSalesmanProblem;
-    tsp->loadFromFile("gr21.tsp");
+    tsp->loadFromFile("br10.atsp");
     std::cout << tsp->geneticAlgorithm();
     delete tsp;
 
