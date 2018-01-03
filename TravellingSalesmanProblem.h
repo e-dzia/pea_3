@@ -24,6 +24,10 @@ public:
 private:
     GraphMatrix citiesDistances;
     int numberOfCities;
+public:
+    int getNumberOfCities() const;
+
+private:
     double stopCriterium = 3; //czas w sekundach
 
     int populationSize = 50;

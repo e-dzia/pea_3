@@ -444,3 +444,7 @@ Path TravellingSalesmanProblem::selectRandomParent() {
         previous = search;
     }
 }
+
+int TravellingSalesmanProblem::getNumberOfCities() const {
+    return numberOfCities;
+}

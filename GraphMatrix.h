@@ -12,6 +12,7 @@ private:
 
 public:
     GraphMatrix();
+    GraphMatrix(const GraphMatrix& gm);
     ~GraphMatrix() override;
 
     void createMatrix(int size);

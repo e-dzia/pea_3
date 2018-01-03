@@ -9,6 +9,10 @@ GraphMatrix::GraphMatrix() {
     matrix = nullptr;
 }
 
+GraphMatrix::GraphMatrix(const GraphMatrix& gm) {
+   this->operator=(gm);
+}
+
 GraphMatrix::~GraphMatrix() {
     if (matrix != nullptr){
         for (int i = 0; i < vertexes; i++){
@@ -149,10 +153,7 @@ int GraphMatrix::getEdgeLength(int start, int end) const {
 }
 
 GraphMatrix& GraphMatrix::operator=(GraphMatrix const& graphMatrix) {
-    this->vertexes = graphMatrix.vertexes;
-    this->edges = graphMatrix.edges;
-    this->density = graphMatrix.density;
-    this->createMatrix(this->vertexes);
+    this->createMatrix(graphMatrix.vertexes);
 
     for (int i = 0; i < this->vertexes; i++){
         for (int j = 0; j < this->vertexes; j++){
