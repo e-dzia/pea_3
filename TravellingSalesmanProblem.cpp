@@ -10,10 +10,17 @@
 
 
 std::string TravellingSalesmanProblem::geneticAlgorithm() {
+    population.clear();
+    bestInPopulation.setRandom();
+
     Timer t;
     t.start();
 
-    for(int i = 0; i < populationSize; i++){
+    Path p;
+    p.setGreedy();
+    population.push_back(p);
+
+    for(int i = 1; i < populationSize; i++){
         Path path;
         path.setRandom();
         population.push_back(path);
@@ -25,7 +32,7 @@ std::string TravellingSalesmanProblem::geneticAlgorithm() {
 //printPopulation();
 
     int nOI = 0;
-    while (/*t.getWithoutStopping() < stopCriterium && */ nOI++ < numberOfIterations){
+    while (t.getWithoutStopping() < stopCriterium /*&&  nOI++ < numberOfIterations*/){
 
         chooseMatingPool();
 //        std::cout << "MatingPool\n"; printPopulation();
@@ -58,14 +65,16 @@ int left = 2; int right = 1;
 }
 
 void TravellingSalesmanProblem::chooseMatingPool() {
-    matingPool.clear();
     int matingPoolSize = populationSize/2;
     for (int i = 0; i < matingPoolSize; i++){
-        Path mother = selectRandomParent();
-        Path father = selectRandomParent();
-        if (mother == father);
-        else {
-            crossover(mother, father);
+        int tmp = rand()%100;
+        if (tmp <= crossoverRate*100) {
+            Path mother = selectRandomParent();
+            Path father = selectRandomParent();
+            if (mother == father);
+            else {
+                crossover(mother, father);
+            }
         }
     }
 
@@ -73,23 +82,20 @@ void TravellingSalesmanProblem::chooseMatingPool() {
 }
 
 void TravellingSalesmanProblem::crossover(const Path &mother, const Path &father) {
-    int tmp = rand()%100;
-    if (tmp <= crossoverRate*100) {
-        Path child;
-        switch (crossoverMethod) {
-            case PMX:
-                child = mother.crossoverPMXfirstChild(father, rand()%numberOfCities, rand()%numberOfCities);
-                population.push_back(child);
-                child = mother.crossoverPMXsecondChild(father, rand()%numberOfCities, rand()%numberOfCities);
-                population.push_back(child);
-                break;
-            case OX:
-                child = mother.crossoverOXfirstChild(father, rand()%numberOfCities, rand()%numberOfCities);
-                population.push_back(child);
-                child = mother.crossoverOXsecondChild(father, rand()%numberOfCities, rand()%numberOfCities);
-                population.push_back(child);
-                break;
-        }
+    Path child;
+    switch (crossoverMethod) {
+        case PMX:
+            child = mother.crossoverPMXfirstChild(father, rand()%numberOfCities, rand()%numberOfCities);
+            population.push_back(child);
+            child = mother.crossoverPMXsecondChild(father, rand()%numberOfCities, rand()%numberOfCities);
+            population.push_back(child);
+            break;
+        case OX:
+            child = mother.crossoverOXfirstChild(father, rand()%numberOfCities, rand()%numberOfCities);
+            population.push_back(child);
+            child = mother.crossoverOXsecondChild(father, rand()%numberOfCities, rand()%numberOfCities);
+            population.push_back(child);
+            break;
     }
 }
 

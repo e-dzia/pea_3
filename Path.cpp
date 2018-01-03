@@ -59,6 +59,7 @@ void Path::setPath(const int *path) {
 
 Path::~Path() {
     delete[] permutation;
+    permutation = nullptr;
 }
 
 void Path::setPath(const Path& p) {
@@ -79,18 +80,45 @@ Path &Path::operator=(Path const& p) {
 }
 
 void Path::setRandom() {
+    if (permutation == nullptr) initialize();
     bool* visited = new bool[numberOfCities];
     for (int i = 0; i < numberOfCities; i++){
         visited[i] = false;
     }
-    visited[0] = true;
-    permutation[0] = 0;
-    for (int i = 1; i < numberOfCities; i++){
+    for (int i = 0; i < numberOfCities; i++){
         do{
             permutation[i] = rand()%numberOfCities;
         }while(visited[permutation[i]]);
         visited[permutation[i]] = true;
     }
+    countPath();
+    delete[] visited;
+}
+
+void Path::setGreedy() {
+    if (permutation == nullptr) initialize();
+    bool *visited = new bool[numberOfCities];
+
+    for (int i = 0; i < numberOfCities; i++){
+        visited[i] = false;
+    }
+    int k = rand()%numberOfCities;
+    permutation[0] = k;
+
+    for(int i = 1; i < numberOfCities; i++) { //algorytm zachlanny szuka ustawienia poczatkowego
+        visited[k] = true;
+        int min = INT32_MAX;
+        int position = -1;
+        for (int j = 0; j < numberOfCities; j++) { //szukanie minimum od obecnej pozycji
+            if (!visited[j] && citiesDistances.getEdgeLength(k, j) != -1 && citiesDistances.getEdgeLength(k, j) < min) {
+                min = citiesDistances.getEdgeLength(k, j);
+                position = j;
+            }
+        }
+        k = position;
+        permutation[i] = position;
+    }
+
     countPath();
     delete[] visited;
 }
@@ -259,6 +287,5 @@ bool Path::operator<=(const Path &p) const {
 bool Path::operator>(const Path &p) const {
     return !operator<=(p);
 }
-
 
 

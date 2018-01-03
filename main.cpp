@@ -13,14 +13,14 @@ int main() {
     //test();
 
     TravellingSalesmanProblem * tsp = new TravellingSalesmanProblem;
-    tsp->loadFromFile("swiss42.tsp");
-    std::cout << tsp->geneticAlgorithm();
+    tsp->loadFromFile("ftv70.atsp");
+    tsp->menu();
     delete tsp;
 
     return 0;
 }
 
-/*void test(){
+void test(){
     TravellingSalesmanProblem *tsp = new TravellingSalesmanProblem();
     tsp->setNumberOfIterations(INT32_MAX);
     std::ofstream fout;
@@ -51,4 +51,4 @@ int main() {
 
     fout.close();
     delete tsp;
-}*/
+}

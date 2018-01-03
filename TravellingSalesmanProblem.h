@@ -24,21 +24,20 @@ public:
 private:
     GraphMatrix citiesDistances;
     int numberOfCities;
-    double stopCriterium = 10; //czas w sekundach
+    double stopCriterium = 3; //czas w sekundach
 
     int populationSize = 50;
-    double mutationRate = 0.01;
-    double crossoverRate = 0.8;
+    double mutationRate = 0.01; //0.01
+    double crossoverRate = 0.8; //0.8
     CrosoverMethod crossoverMethod = OX;
     MutationMethod mutationMethod = INSERT;
 
-    int numberOfIterations = 10000; //for debugging
+    int numberOfIterations = 1000; //for debugging
     int start = 0;
 
     //void permute(int *permutation, int left, int right, int &min, int *result);
 
     std::vector<Path> population;
-    std::vector<std::map<Path,Path>> matingPool;
     Path bestInPopulation;
 
 public:

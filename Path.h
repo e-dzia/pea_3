@@ -44,6 +44,7 @@ public:
     void setPath(const int *path);
     void setPath(const Path& p);
     void setRandom();
+    void setGreedy();
     static void setCitiesDistances(GraphMatrix& citiesDistances);
     int getLength() const;
 
