@@ -108,16 +108,16 @@ void test3(){
     tsp->setStopCriterium(3);
     tsp->setCrossoverMethod(TravellingSalesmanProblem::OX); //TODO: ocenić na podstawie poprzednich
     tsp->setMutationMethod(TravellingSalesmanProblem::INSERT); //TODO: ocenić na podstawie poprzednich
-    tsp->setCrossoverRate(0.8);
+    tsp->setMutationRate(0.01);
 
-    double mutationRates[] = {0.01, 0.05, 0.1};
+    double crossoverRates[] = {0.5, 0.7, 0.9};
     for (const auto &i : filenames) { //pliki
         tsp->loadFromFile(i);
         int size = 2*tsp->getNumberOfCities(); //TODO: Wykalibrować do każdego pliku oddzielnie
         filename = "res3_"; filename += i; filename += ".txt";
         fout.open(filename);
         for (int j = 0; j < 3; j++){ //współczynnik mutacji
-            tsp->setMutationRate(mutationRates[j]);
+            tsp->setCrossoverRate(crossoverRates[j]);
             for (int m = 0; m < 10; m++){
                 result = tsp->geneticAlgorithm();
                 result_position = result.find(':',30);
