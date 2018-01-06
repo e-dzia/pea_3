@@ -6,6 +6,7 @@
 #include <fstream>
 #include <vector>
 #include <map>
+#include <random>
 #include "Timer.h"
 #include "Path.h"
 
@@ -39,10 +40,22 @@ private:
     int numberOfIterations = 1000; //for debugging
     int start = 0;
 
-    //void permute(int *permutation, int left, int right, int &min, int *result);
+    std::mt19937 rnd;
 
     std::vector<Path> population;
     Path bestInPopulation;
+
+    void chooseMatingPool();
+    void crossover(const Path &mother, const Path &father);
+    void mutation();
+    void newPopulation();
+    void checkBest();
+
+    void sortPopulation();
+    void deleteDuplicates();
+    void deleteWorst();
+
+    Path selectRandomParent();
 
 public:
 
@@ -53,8 +66,6 @@ public:
     void setCrossoverRate(double crossoverRate);
     void setCrossoverMethod(CrosoverMethod crossoverMethod);
     void setMutationMethod(MutationMethod mutationMethod);
-
-
     void setStopCriterium(double stopCriterium);
     void setNumberOfIterations(int numberOfIterations);
 
@@ -62,29 +73,12 @@ public:
 
     bool loadFromFile(std::string filename);
     void saveToFile(std::string filename);
-    void generateRandom(int size);
 
     double testTime(int algorithmType);
     void menu();
 
-    void restart(int *current_permutation);
-    void restart_random(int *permutation);
-    int beginning(int *current_permutation);
-
-    void chooseMatingPool();
-    void crossover(const Path &mother, const Path &father);
-    void mutation();
-    void newPopulation();
-    void checkBest();
-
-    void sortPopulation();
-    void deleteDuplicates();
-
-    void deleteWorst();
-
     void printPopulation();
 
-    Path selectRandomParent();
 };
 
 

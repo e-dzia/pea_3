@@ -138,6 +138,7 @@ int Path::getLength() const {
 void Path::setCitiesDistances(GraphMatrix& citiesDistances) {
     Path::citiesDistances = citiesDistances;
     Path::numberOfCities = citiesDistances.getNumberOfVertexes();
+
 }
 
 void Path::print(std::ostream &str) const {

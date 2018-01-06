@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <set>
+#include <random>
 
 
 std::string TravellingSalesmanProblem::geneticAlgorithm() {
@@ -29,32 +30,13 @@ std::string TravellingSalesmanProblem::geneticAlgorithm() {
         }
     }
 
-//printPopulation();
-
-    int nOI = 0;
+    //int nOI = 0; //used for debugging
     while (t.getWithoutStopping() < stopCriterium /*&&  nOI++ < numberOfIterations*/){
-
         chooseMatingPool();
-//        std::cout << "MatingPool\n"; printPopulation();
-
         mutation();
-  //      std::cout << "Mutation\n";printPopulation();
-
         newPopulation();
-        //std::cout << "NewPop\n"; printPopulation();
-
         checkBest();
     }
-
-
-/*printPopulation();
-int left = 2; int right = 1;
-    Path child = population[0].crossoverPMXfirstChild(population[1], left, right);
-    population.push_back(child);
-    child = population[0].crossoverPMXsecondChild(population[1], left, right);
-    population.push_back(child);*/
-
-//printPopulation();
 
     std::stringstream ss;
     ss << "Algorytm genetyczny.\nWynik " << std::endl;
@@ -77,8 +59,25 @@ void TravellingSalesmanProblem::chooseMatingPool() {
             }
         }
     }
+}
 
+Path TravellingSalesmanProblem::selectRandomParent() {
+    double sum = 0;
+    for (const Path &p: population){
+        sum += 1.0/p.getLength();
+    }
 
+    std::uniform_real_distribution < double > dist( 0, sum );
+    double random = dist( rnd );
+
+    double search = 0;
+    double previous = search;
+    for (const Path &p: population){
+        search += 1.0/p.getLength();
+        if (random < search && random >= previous) return p;
+        previous = search;
+    }
+    return population[population.size()-1];
 }
 
 void TravellingSalesmanProblem::crossover(const Path &mother, const Path &father) {
@@ -152,102 +151,6 @@ void TravellingSalesmanProblem::deleteWorst() {
     }
 }
 
-
-void TravellingSalesmanProblem::restart_random(int *current_permutation) { //restart calkowicie losowy - nieuzywana funkcja, okazala sie niezbyt skuteczna
-    bool* visited = new bool[numberOfCities];
-    for (int i = 0; i < numberOfCities; i++){
-        visited[i] = false;
-    }
-    visited[0] = true;
-    current_permutation[0] = 0;
-    for (int i = 1; i < numberOfCities; i++){
-        do{
-            current_permutation[i] = rand()%numberOfCities;
-        }while(visited[current_permutation[i]]);
-        visited[current_permutation[i]] = true;
-    }
-    delete[] visited;
-}
-
-void TravellingSalesmanProblem::restart(int *current_permutation) { //restart - algorytm zachlanny, w ktorym drugi wierzcholek jest losowy
-    bool *visited = new bool[numberOfCities];
-    for (int i = 0; i < numberOfCities; i++){
-        visited[i] = false;
-    }
-
-    int k = start;
-    current_permutation[0] = start; //pierwszy wierzcholek to wierzcholek startowy
-    visited[start] = true;
-    current_permutation[1] = rand()%(numberOfCities-1)+1; //wylosowanie drugiego wierzcholka
-    visited[current_permutation[1]] = true;
-    for(int i = 2; i < numberOfCities; i++){ //algorytm zachlanny szuka kolejnych wierzcholkow
-        visited[k] = true;
-        int min = INT32_MAX;
-        int position = -1;
-        for (int j = 0; j < numberOfCities; j++){ //szukanie minimum od obecnej pozycji
-            if (!visited[j] && citiesDistances.getEdgeLength(k,j) != -1 && citiesDistances.getEdgeLength(k,j) < min){
-                min = citiesDistances.getEdgeLength(k,j);
-                position = j;
-            }
-        }
-        k = position;
-        current_permutation[i] = position;
-    }
-    delete[] visited;
-}
-
-int TravellingSalesmanProblem::beginning(int *current_permutation) { //zwykly algorytm zachlanny szuka poczatkowego rozwiazania
-    bool *visited = new bool[numberOfCities];
-    int length = 0;
-
-    for (int i = 0; i < numberOfCities; i++){
-        visited[i] = false;
-    }
-    int k = start;
-
-    current_permutation[0] = start;
-    for(int i = 1; i < numberOfCities; i++){ //algorytm zachlanny szuka ustawienia poczatkowego
-        visited[k] = true;
-        int min = INT32_MAX;
-        int position = -1;
-        for (int j = 0; j < numberOfCities; j++){ //szukanie minimum od obecnej pozycji
-            if (!visited[j] && citiesDistances.getEdgeLength(k,j) != -1 && citiesDistances.getEdgeLength(k,j) < min){
-                min = citiesDistances.getEdgeLength(k,j);
-                position = j;
-            }
-        }
-        length += min;
-        k = position;
-        current_permutation[i] = position;
-    }
-    length += citiesDistances.getEdgeLength(k,start);
-
-    delete[] visited;
-    return length;
-}
-
-/*void TravellingSalesmanProblem::permute(int *permutation, int left, int right, int &min, int *result) {
-    if (left == right){
-        int length = countPath(permutation);
-        if (length < min){
-            min = length;
-            for (int i = 0; i < numberOfCities; i++){
-                result[i] =  permutation[i];
-            }
-        }
-    }
-    else
-    {
-        for (int i = left; i <= right; i++)
-        {
-            swap(permutation, i, left);
-            permute(permutation, left + 1, right, min, result);
-            swap(permutation, i, left); //powrót do poprzedniego
-        }
-    }
-
-}
-*/
 void TravellingSalesmanProblem::saveToFile(std::string filename) {
     std::ofstream fout;
     fout.open(filename.c_str());
@@ -270,12 +173,6 @@ bool TravellingSalesmanProblem::loadFromFile(std::string filename) {
        return true;
     }
     else return false;
-}
-
-void TravellingSalesmanProblem::generateRandom(int size) {
-    numberOfCities = size;
-    citiesDistances.createRandom(numberOfCities,100);
-    //citiesDistances.makeBothWaysEqual();
 }
 
 void TravellingSalesmanProblem::menu() {
@@ -393,6 +290,9 @@ double TravellingSalesmanProblem::testTime(int algorithmType) {
 }
 
 TravellingSalesmanProblem::TravellingSalesmanProblem() {
+    std::random_device rd;
+    std::mt19937 e2(rd());
+    rnd = e2;
 }
 
 void TravellingSalesmanProblem::setStopCriterium(double stopCriterium) {
@@ -423,28 +323,13 @@ void TravellingSalesmanProblem::setMutationMethod(TravellingSalesmanProblem::Mut
     TravellingSalesmanProblem::mutationMethod = mutationMethod;
 }
 
+int TravellingSalesmanProblem::getNumberOfCities() const {
+    return numberOfCities;
+}
+
 void TravellingSalesmanProblem::printPopulation() {
     for (Path p: population){
         std::cout << p.getLength() << " ##### " << p;
     }
     std::cout << "#########################\n";
-}
-
-Path TravellingSalesmanProblem::selectRandomParent() {
-    int sum = 0;
-    for (const Path &p: population){
-        sum += p.getLength();
-    }
-    int tmp = rand()%sum;
-    int search = 0;
-    int previous = search;
-    for (const Path &p: population){
-        search += p.getLength();
-        if (tmp < search && tmp >= previous) return p;
-        previous = search;
-    }
-}
-
-int TravellingSalesmanProblem::getNumberOfCities() const {
-    return numberOfCities;
 }
