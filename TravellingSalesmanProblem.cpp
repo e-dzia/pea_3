@@ -116,9 +116,7 @@ void TravellingSalesmanProblem::mutation() {
 
 void TravellingSalesmanProblem::newPopulation() {
     sortPopulation();
-    if (population.size() > populationSize){
-        deleteDuplicates();
-    }
+    deleteDuplicates();
     if (population.size() > populationSize){
         deleteWorst();
     }
