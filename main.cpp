@@ -4,27 +4,23 @@
 #include "TravellingSalesmanProblem.h"
 #include "Path.h"
 
-void test();
-void test2();
-void test3();
+void test_size();
+void test_crossover();
+void test_mutation();
 
 
 int main() {
     srand(time(NULL));
 
-    test();
-
-    /*TravellingSalesmanProblem * tsp = new TravellingSalesmanProblem;
-    tsp->loadFromFile("swiss42.tsp");
-    //tsp->loadFromFile("ftv70.atsp");
+    TravellingSalesmanProblem * tsp = new TravellingSalesmanProblem;
+    tsp->loadFromFile("gr21.tsp");
     tsp->menu();
     delete tsp;
-*/
 
     return 0;
 }
 
-void test(){
+void test_size(){
     TravellingSalesmanProblem *tsp = new TravellingSalesmanProblem();
     tsp->setNumberOfIterations(INT32_MAX);
     std::ofstream fout;
@@ -68,7 +64,7 @@ void test(){
     delete tsp;
 }
 
-void test2(){
+void test_mutation(){
     TravellingSalesmanProblem *tsp = new TravellingSalesmanProblem();
     tsp->setNumberOfIterations(INT32_MAX);
     std::ofstream fout;
@@ -83,24 +79,31 @@ void test2(){
     double times[] = {0.1, 0.3, 0.5, 0.7, 1.0, 2.0, 5.0, 8.0};
 
     double mutationRates[] = {0.01, 0.05, 0.1};
+    int sizes[] = {42,126,71};
+    int size = 0;
     for (const auto &i : filenames) {
         if (!tsp->loadFromFile(i)) return;
-        int size = 2*tsp->getNumberOfCities(); //TODO: Wykalibrować do każdego pliku oddzielnie
-        filename = "res2_"; filename += i; filename += ".txt";
+        filename = "res3_"; filename += i; filename += ".txt";
         fout.open(filename);
-        for (int j = 0; j < 3; j++){
-            tsp->setMutationRate(mutationRates[j]);
-            for (double time : times){
-                tsp->setStopCriterium(time);
-                for (int m = 0; m < 10; m++){
-                    result = tsp->geneticAlgorithm();
-                    result_position = result.find(':',30);
-                    result = result.substr(result_position, result.size()- result_position-1);
-                    fout << j << " " << size << " " << time << " " << result << std::endl;
-                    //std::cout << j << " " << size << " " << time << " " << result << std::endl;
+        tsp->setSizeOfPopulation(sizes[size++]);
+        for (int j = 0; j < 2; j++){
+            tsp->setCrossoverMethod(static_cast<TravellingSalesmanProblem::CrosoverMethod>(j));
+            for (int k = 0; k < 2; k++){
+                tsp->setMutationMethod(static_cast<TravellingSalesmanProblem::MutationMethod >(k));
+                for (double mutationRate : mutationRates) {
+                    tsp->setMutationRate(mutationRate);
+                    for (double time: times){
+                        tsp->setStopCriterium(time);
+                        for (int m = 0; m < 10; m++){
+                            result = tsp->geneticAlgorithm();
+                            result_position = result.find(':',30);
+                            result = result.substr(result_position, result.size()- result_position-1);
+                            fout << j << " " << k << " " << mutationRate << " " << time << " " << result << std::endl;
+                            //std::cout << j << " " << k << " " << mutationRate << " " << time << " " << result << std::endl;
+                        }
+                    }
                 }
             }
-
         }
         fout.close();
     }
@@ -109,11 +112,11 @@ void test2(){
     delete tsp;
 }
 
-void test3(){
+void test_crossover(){
     TravellingSalesmanProblem *tsp = new TravellingSalesmanProblem();
     tsp->setNumberOfIterations(INT32_MAX);
     std::ofstream fout;
-    std::string filenames[] = {"gr21.tsp", "swiss42.tsp", "ftv70.atsp"};
+    std::string filenames[] = {"ftv70.atsp"/*, "gr21.tsp", "swiss42.tsp"*/};
     std::string filename, result;
     unsigned long long int result_position;
     tsp->setStopCriterium(3);
@@ -125,24 +128,34 @@ void test3(){
     double times[] = {0.1, 0.3, 0.5, 0.7, 1.0, 2.0, 5.0, 8.0};
 
     double crossoverRates[] = {0.5, 0.7, 0.9};
-    for (const auto &i : filenames) { //pliki
+    int sizes[] = {71, 42, 126};
+    int size = 0;
+    for (const auto &i : filenames) {
         if (!tsp->loadFromFile(i)) return;
-        int size = 2*tsp->getNumberOfCities(); //TODO: Wykalibrować do każdego pliku oddzielnie
-        filename = "res3_"; filename += i; filename += ".txt";
+        filename = "res2_tmp_";
+        filename += i;
+        filename += ".txt";
+        //std::cout << filename << "\n";
         fout.open(filename);
-        for (int j = 0; j < 3; j++){
-            tsp->setCrossoverRate(crossoverRates[j]);
-            for (double time : times){
-                tsp->setStopCriterium(time);
-                for (int m = 0; m < 10; m++){
-                    result = tsp->geneticAlgorithm();
-                    result_position = result.find(':',30);
-                    result = result.substr(result_position, result.size()- result_position-1);
-                    fout << j << " " << size << " " << time << " " << result << std::endl;
-                    //std::cout << j << " " << size << " " << time << " " << result << std::endl;
+        tsp->setSizeOfPopulation(sizes[size++]);
+        for (int j = 0; j < 2; j++) {
+            tsp->setCrossoverMethod(static_cast<TravellingSalesmanProblem::CrosoverMethod>(j));
+            for (int k = 0; k < 2; k++) {
+                tsp->setMutationMethod(static_cast<TravellingSalesmanProblem::MutationMethod >(k));
+                for (double crossoverRate : crossoverRates) {
+                    tsp->setCrossoverRate(crossoverRate);
+                    for (double time: times) {
+                        tsp->setStopCriterium(time);
+                        for (int m = 0; m < 10; m++) {
+                            result = tsp->geneticAlgorithm();
+                            result_position = result.find(':', 30);
+                            result = result.substr(result_position, result.size() - result_position - 1);
+                            fout << j << " " << k << " " << crossoverRate << " " << time << " " << result << std::endl;
+                            //std::cout << j << " " << k << " " << crossoverRate << " " << time << " " << result << std::endl;
+                        }
+                    }
                 }
             }
-
         }
         fout.close();
     }

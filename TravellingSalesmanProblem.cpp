@@ -195,8 +195,12 @@ void TravellingSalesmanProblem::menu() {
             std::cout << "Prosze podac nazwe pliku.\n";
             std::cin >> file_name;
             if (this->loadFromFile(file_name)){
-                std::cout << "Poprawnie wczytano.\n";
-                std::cout << citiesDistances;
+                std::cout << "Poprawnie wczytano.\nWyswietlic? [t/n]";
+                char show;
+                std::cin >> show;
+                if (show == 't' || show == 'T'){
+                    std::cout << citiesDistances;
+                }
             }
             else std::cout << "Nie udalo sie wczytac pliku.\n";
             break;

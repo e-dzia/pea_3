@@ -53,7 +53,10 @@ bool FileParser::tsp() {
     std::string tmp;
     if (!searchInFile("DIMENSION:")) return false;
 
-    fin >> numberOfCities;
+    fin >> tmp;
+    if (tmp == ":") fin >> tmp;
+    numberOfCities = atoi(tmp.c_str());
+
     graphMatrix.createMatrix(numberOfCities);
 
     if (!searchInFile("EDGE_WEIGHT_TYPE:")) return false;
